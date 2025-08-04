@@ -497,8 +497,8 @@
                 if (!participantsResponse.ok) {
                     throw new Error(`参加者リストの読み込みに失敗: ${participantsResponse.status}`);
                 }
-                const participantsData = await participantsResponse.json();
-                participantsList = participantsData.participants;
+                const participantsDataResponse = await participantsResponse.json();
+                participantsList = participantsDataResponse.participants;
 
                 // 評価データを読み込み
                 const evaluationResponse1 = await fetch('./evaluation_data_part1.json');
@@ -517,7 +517,7 @@
                 const allEvaluations = [...evaluationData1.evaluations, ...evaluationData2.evaluations];
                 
                 // 参加者リストと評価データを統合
-                participantsData = participantsList.map(participant => {
+                const allParticipantsData = participantsList.map(participant => {
                     const evaluation = allEvaluations.find(eval => eval.name === participant.name);
                     
                     if (evaluation) {
@@ -548,6 +548,9 @@
                         };
                     }
                 });
+
+                // グローバル変数に代入
+                participantsData = allParticipantsData;
 
                 // データ読み込み完了後、チャートとUIを初期化
                 initializeChartsAndUI();
