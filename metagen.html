@@ -278,7 +278,7 @@
         <section class="card">
             <h2 class="section-title">受講者全体の分布マップ</h2>
             <p class="mb-6 text-white">
-                全受講者の総合スコア（X軸）と、特に重要な★マーク視点への言及数スコア（Y軸）をプロットした散布図です。
+                提出済み受講者の総合スコア（X軸）と、特に重要な★マーク視点への言及数スコア（Y軸）をプロットした散布図です。
                 あなたの位置付けや、グループ全体の傾向を把握できます。
             </p>
             <div class="h-96 w-full">
@@ -732,14 +732,8 @@
                     datasets: [{
                         label: '受講者スコア分布',
                         data: scatterData,
-                        backgroundColor: function(context) {
-                            const dataPoint = context.dataset.data[context.dataIndex];
-                            return dataPoint.submitted ? 'rgba(255, 255, 255, 0.7)' : 'rgba(255, 0, 0, 0.5)';
-                        },
-                        borderColor: function(context) {
-                            const dataPoint = context.dataset.data[context.dataIndex];
-                            return dataPoint.submitted ? 'rgba(255, 255, 255, 1)' : 'rgba(255, 0, 0, 1)';
-                        },
+                        backgroundColor: 'rgba(255, 255, 255, 0.7)',
+                        borderColor: 'rgba(255, 255, 255, 1)',
                         borderWidth: 1,
                         pointRadius: 6,
                         pointHoverRadius: 8
@@ -778,27 +772,7 @@
                     },
                     plugins: {
                         legend: {
-                            display: true,
-                            labels: {
-                                color: '#ffffff',
-                                usePointStyle: true,
-                                generateLabels: function(chart) {
-                                    return [
-                                        {
-                                            text: '提出済み',
-                                            fillStyle: 'rgba(255, 255, 255, 0.7)',
-                                            strokeStyle: 'rgba(255, 255, 255, 1)',
-                                            pointStyle: 'circle'
-                                        },
-                                        {
-                                            text: '未提出',
-                                            fillStyle: 'rgba(255, 0, 0, 0.5)',
-                                            strokeStyle: 'rgba(255, 0, 0, 1)',
-                                            pointStyle: 'circle'
-                                        }
-                                    ];
-                                }
-                            }
+                            display: false // 凡例を非表示（提出済みのみ表示するため）
                         },
                         datalabels: {
                             display: true,
@@ -817,8 +791,7 @@
                             callbacks: {
                                 label: function(context) {
                                     const dataPoint = context.raw;
-                                    const status = dataPoint.submitted ? '提出済み' : '未提出';
-                                    return `${dataPoint.name} (${status}) - 総合: ${dataPoint.x.toFixed(1)}, ★視点: ${dataPoint.y.toFixed(1)})`;
+                                    return `${dataPoint.name} - 総合: ${dataPoint.x.toFixed(1)}, ★視点: ${dataPoint.y.toFixed(1)}`;
                                 }
                             }
                         }
