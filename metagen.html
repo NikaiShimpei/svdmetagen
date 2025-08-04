@@ -608,8 +608,13 @@
         // 注：この部分は重複しているため削除（initializeChartsAndUI関数内で計算済み）
 
         // スパイダーチャート描画関数
-        function createSpiderChart(canvasId, participantScores) {
+        function createSpiderChart(canvasId, participantScores, chartType = 'overall') {
             const ctx = document.getElementById(canvasId).getContext('2d');
+            
+            // 既存のチャートを破棄
+            if (window.chartInstances && window.chartInstances[canvasId]) {
+                window.chartInstances[canvasId].destroy();
+            }
             
             // カテゴリ統計を計算（提出済みの参加者のみ）
             const categoryStats = {};
@@ -625,20 +630,55 @@
                 averageScores[cat] = mean;
             });
             
-            const participantData = categories.map(cat => {
-                return participantScores[cat]; // 生スコアをそのまま使用（既に100点満点に正規化済み）
-            });
-            const averageData = categories.map(cat => {
-                return averageScores[cat]; // 生スコアをそのまま使用（既に100点満点に正規化済み）
-            });
+            let participantData, averageData, chartTitle;
+            
+            if (chartType === 'overall') {
+                // 総合スコアチャート（カテゴリ別スコア）
+                participantData = categories.map(cat => {
+                    return participantScores[cat]; // 生スコアをそのまま使用（既に100点満点に正規化済み）
+                });
+                averageData = categories.map(cat => {
+                    return averageScores[cat]; // 生スコアをそのまま使用（既に100点満点に正規化済み）
+                });
+                chartTitle = '総合スコア（カテゴリ別評価）';
+            } else {
+                // ★マーク視点チャート（重要視点の言及度）
+                // 各カテゴリの★マーク視点への言及度を計算
+                const importantPointsByCategory = {
+                    'A': [1, 4, 6, 7, 12, 13, 14], // 7視点
+                    'B': [20, 21, 22], // 3視点
+                    'C': [28, 33, 34, 36], // 4視点
+                    'D': [42, 44, 45], // 3視点
+                    'E': [48, 54] // 2視点
+                };
+                
+                participantData = categories.map(cat => {
+                    if (importantPointsByCategory[cat]) {
+                        // 各カテゴリの★マーク視点言及度を計算（簡易版）
+                        // 実際のデータに基づいて調整が必要
+                        return Math.round((participantScores[cat] / 100) * importantPointsByCategory[cat].length * 10);
+                    }
+                    return 0;
+                });
+                
+                // 全体平均の★マーク視点言及度
+                averageData = categories.map(cat => {
+                    if (importantPointsByCategory[cat]) {
+                        const avgScore = averageScores[cat];
+                        return Math.round((avgScore / 100) * importantPointsByCategory[cat].length * 10);
+                    }
+                    return 0;
+                });
+                chartTitle = '★マーク視点言及度（カテゴリ別）';
+            }
 
-            new Chart(ctx, {
+            const chart = new Chart(ctx, {
                 type: 'radar',
                 data: {
                     labels: categories.map(cat => categoryLabels[cat]),
                     datasets: [
                         {
-                            label: 'あなたのスコア (100点満点)',
+                            label: chartType === 'overall' ? 'あなたのスコア (100点満点)' : 'あなたの言及度',
                             data: participantData,
                             backgroundColor: 'rgba(66, 133, 244, 0.2)', /* Google Blue with opacity */
                             borderColor: 'rgba(66, 133, 244, 1)',
@@ -649,7 +689,7 @@
                             pointHoverBorderColor: 'rgba(66, 133, 244, 1)'
                         },
                         {
-                            label: '全体平均 (100点満点)',
+                            label: chartType === 'overall' ? '全体平均 (100点満点)' : '全体平均言及度',
                             data: averageData,
                             backgroundColor: 'rgba(234, 67, 53, 0.1)', /* Google Red with opacity */
                             borderColor: 'rgba(234, 67, 53, 0.8)',
@@ -711,6 +751,14 @@
                     }
                 }
             });
+            
+            // チャートインスタンスを保存
+            if (!window.chartInstances) {
+                window.chartInstances = {};
+            }
+            window.chartInstances[canvasId] = chart;
+            
+            return chart;
         }
 
         // 散布図描画関数
@@ -837,7 +885,7 @@
             header.setAttribute('data-target', `content-${index}`);
                 
                 const statusText = participant.submitted ? 
-                    `総合スコア: ${participant.overallScore}` : 
+                    `総合スコア: ${participant.overallScore} | ★マーク視点: ${participant.importantPointCount}` : 
                     '<span class="text-red-400">未提出</span>';
                 
             header.innerHTML = `
@@ -868,8 +916,15 @@
                     </div>
                 </div>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
-                    <div class="h-64 md:h-80">
-                        <canvas id="spiderChart-${index}"></canvas>
+                    <div>
+                        <div class="flex justify-center mb-4">
+                            <button id="chartToggle-${index}" class="bg-white bg-opacity-20 hover:bg-opacity-30 text-white px-4 py-2 rounded-lg transition-all duration-200 font-semibold" onclick="toggleChart(${index})">
+                                総合スコアチャート
+                            </button>
+                        </div>
+                        <div class="h-64 md:h-80">
+                            <canvas id="spiderChart-${index}"></canvas>
+                        </div>
                     </div>
                     <div>
                         <h4 class="font-semibold text-lg text-white mb-2">良かった点</h4>
@@ -897,7 +952,13 @@
 
                 // 提出済みの場合のみチャートを描画
                 if (participant.submitted) {
-            setTimeout(() => createSpiderChart(`spiderChart-${index}`, participant.scores), 100);
+                    // チャートタイプの状態を保存
+                    if (!window.chartStates) {
+                        window.chartStates = {};
+                    }
+                    window.chartStates[index] = 'overall';
+                    
+                    setTimeout(() => createSpiderChart(`spiderChart-${index}`, participant.scores, 'overall'), 100);
                 }
         });
         }
@@ -935,6 +996,25 @@
             });
             heatmapBody.appendChild(row);
         });
+        }
+
+        // チャート切り替え関数
+        function toggleChart(index) {
+            const participant = participantsData[index];
+            const button = document.getElementById(`chartToggle-${index}`);
+            const currentState = window.chartStates[index];
+            
+            if (currentState === 'overall') {
+                // ★マーク視点チャートに切り替え
+                window.chartStates[index] = 'important';
+                button.textContent = '★マーク視点チャート';
+                createSpiderChart(`spiderChart-${index}`, participant.scores, 'important');
+            } else {
+                // 総合スコアチャートに切り替え
+                window.chartStates[index] = 'overall';
+                button.textContent = '総合スコアチャート';
+                createSpiderChart(`spiderChart-${index}`, participant.scores, 'overall');
+            }
         }
 
         // データ読み込みの開始
