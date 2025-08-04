@@ -293,20 +293,20 @@
                 <span class="font-medium text-red-400">暖色系（赤〜オレンジ）が高評価</span>、<span class="font-medium text-blue-400">寒色系（青系）が手薄になっている視点</span>であることを示す。
             </p>
 
-            <div class="overflow-x-auto rounded-lg shadow-sm">
-                <table class="min-w-full bg-transparent border border-white border-opacity-20 heatmap-table">
-                    <thead>
+            <div class="overflow-x-auto rounded-lg shadow-sm" style="max-height: 600px;">
+                <table class="min-w-full bg-transparent border border-white border-opacity-20 heatmap-table" style="position: relative;">
+                    <thead style="position: sticky; top: 0; z-index: 10;">
                         <tr>
                             <th class="py-3 px-4 bg-white bg-opacity-10 text-left text-xs font-semibold text-white uppercase tracking-wider rounded-tl-lg">受講者名</th>
-                            <th class="py-3 px-4 bg-white bg-opacity-10 text-left text-xs font-semibold text-white uppercase tracking-wider" title="A. 経営・事業戦略">A</th>
-                            <th class="py-3 px-4 bg-white bg-opacity-10 text-left text-xs font-semibold text-white uppercase tracking-wider" title="B. ファイナンス・ガバナンス・法務">B</th>
-                            <th class="py-3 px-4 bg-white bg-opacity-10 text-left text-xs font-semibold text-white uppercase tracking-wider" title="C. BtoB/BtoC戦略とサービス開発">C</th>
-                            <th class="py-3 px-4 bg-white bg-opacity-10 text-left text-xs font-semibold text-white uppercase tracking-wider" title="D. ヘルスケアマーケティングと信頼構築">D</th>
-                            <th class="py-3 px-4 bg-white bg-opacity-10 text-left text-xs font-semibold text-white uppercase tracking-wider" title="E. 組織・人材・パートナーシップ">E</th>
-                            <th class="py-3 px-4 bg-white bg-opacity-10 text-left text-xs font-semibold text-white uppercase tracking-wider" title="F. 博報堂の存在意義">F</th>
-                            <th class="py-3 px-4 bg-white bg-opacity-10 text-left text-xs font-semibold text-white uppercase tracking-wider" title="G. ブランディング・クリエイティブ">G</th>
-                            <th class="py-3 px-4 bg-white bg-opacity-10 text-left text-xs font-semibold text-white uppercase tracking-wider" title="H. 広告・プロモーション">H</th>
-                            <th class="py-3 px-4 bg-white bg-opacity-10 text-left text-xs font-semibold text-white uppercase tracking-wider rounded-tr-lg" title="I. デジタル・顧客体験">I</th>
+                            <th class="py-3 px-4 bg-white bg-opacity-10 text-left text-xs font-semibold text-white uppercase tracking-wider" title="A. 経営・事業戦略">A<br><span class="text-xs font-normal">経営・事業戦略</span></th>
+                            <th class="py-3 px-4 bg-white bg-opacity-10 text-left text-xs font-semibold text-white uppercase tracking-wider" title="B. ファイナンス・ガバナンス・法務">B<br><span class="text-xs font-normal">ファイナンス・法務</span></th>
+                            <th class="py-3 px-4 bg-white bg-opacity-10 text-left text-xs font-semibold text-white uppercase tracking-wider" title="C. BtoB/BtoC戦略とサービス開発">C<br><span class="text-xs font-normal">BtoB/BtoC戦略</span></th>
+                            <th class="py-3 px-4 bg-white bg-opacity-10 text-left text-xs font-semibold text-white uppercase tracking-wider" title="D. ヘルスケアマーケティングと信頼構築">D<br><span class="text-xs font-normal">ヘルスケア・マーケティング</span></th>
+                            <th class="py-3 px-4 bg-white bg-opacity-10 text-left text-xs font-semibold text-white uppercase tracking-wider" title="E. 組織・人材・パートナーシップ">E<br><span class="text-xs font-normal">組織・人材</span></th>
+                            <th class="py-3 px-4 bg-white bg-opacity-10 text-left text-xs font-semibold text-white uppercase tracking-wider" title="F. 博報堂の存在意義">F<br><span class="text-xs font-normal">博報堂の存在意義</span></th>
+                            <th class="py-3 px-4 bg-white bg-opacity-10 text-left text-xs font-semibold text-white uppercase tracking-wider" title="G. ブランディング・クリエイティブ">G<br><span class="text-xs font-normal">ブランディング・クリエイティブ</span></th>
+                            <th class="py-3 px-4 bg-white bg-opacity-10 text-left text-xs font-semibold text-white uppercase tracking-wider" title="H. 広告・プロモーション">H<br><span class="text-xs font-normal">広告・プロモーション</span></th>
+                            <th class="py-3 px-4 bg-white bg-opacity-10 text-left text-xs font-semibold text-white uppercase tracking-wider rounded-tr-lg" title="I. デジタル・顧客体験">I<br><span class="text-xs font-normal">デジタル・顧客体験</span></th>
                         </tr>
                     </thead>
                     <tbody id="heatmap-body" class="divide-y divide-white divide-opacity-10">
@@ -749,7 +749,8 @@
                             title: {
                                 display: true,
                                 text: '総合スコア (100点満点)',
-                                font: { size: 14, weight: 'bold', color: '#ffffff' }
+                                font: { size: 14, weight: 'bold', color: '#ffffff' },
+                                color: '#ffffff'
                             },
                             grid: { color: 'rgba(255, 255, 255, 0.1)' },
                             ticks: { color: 'rgba(255, 255, 255, 0.7)' },
@@ -762,11 +763,12 @@
                             title: {
                                 display: true,
                                 text: '★マーク視点言及数スコア (100点満点)',
-                                font: { size: 14, weight: 'bold', color: '#ffffff' }
+                                font: { size: 14, weight: 'bold', color: '#ffffff' },
+                                color: '#ffffff'
                             },
                             grid: { color: 'rgba(255, 255, 255, 0.1)' },
                             ticks: { color: 'rgba(255, 255, 255, 0.7)' },
-                            min: 0, max: 100,
+                            min: 0, max: 60,
                             stepSize: 20
                         }
                     },
@@ -805,21 +807,15 @@
             // 100点満点のスコアを直接使用して色分け
             let color1, color2;
 
-            if (score >= 80) {
+            if (score >= 56) {
                 color1 = 'rgba(234, 67, 53, 0.5)'; /* Red */
                 color2 = 'rgba(255, 153, 0, 0.5)'; /* Orange */
-            } else if (score >= 60) {
-                color1 = 'rgba(234, 67, 53, 0.3)'; /* Red */
-                color2 = 'rgba(255, 153, 0, 0.3)'; /* Orange */
             } else if (score >= 40) {
-                color1 = 'rgba(156, 39, 176, 0.3)'; /* Purple */
-                color2 = 'rgba(234, 67, 53, 0.3)'; /* Red */
-            } else if (score >= 20) {
-                color1 = 'rgba(66, 133, 244, 0.3)'; /* Blue */
-                color2 = 'rgba(156, 39, 176, 0.3)'; /* Purple */
+                color1 = 'rgba(156, 39, 176, 0.4)'; /* Purple */
+                color2 = 'rgba(234, 67, 53, 0.4)'; /* Red */
             } else {
-                color1 = 'rgba(66, 133, 244, 0.2)'; /* Blue */
-                color2 = 'rgba(156, 39, 176, 0.2)'; /* Purple */
+                color1 = 'rgba(66, 133, 244, 0.4)'; /* Blue */
+                color2 = 'rgba(66, 133, 244, 0.4)'; /* Blue */
             }
             return `linear-gradient(135deg, ${color1}, ${color2})`;
         }
