@@ -1,0 +1,1016 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>生活者価値デザイン研修プログラム</title>
+    <!-- Google Fonts: Mplus 1 -->
+    <link href="https://fonts.googleapis.com/css2?family=Mplus+1:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
+    <style>
+        body {
+            font-family: 'Mplus 1'; /* Removed sans-serif to ensure Mplus 1 is primary */
+            /* Gradient background inspired by Gemini icon colors */
+            background: linear-gradient(135deg, #4285F4 0%, #9C27B0 50%, #EA4335 100%);
+            color: #e0f2fe; /* Light Blue Text */
+            line-height: 1.6;
+            min-height: 100vh; /* Ensure gradient covers full height */
+            display: flex;
+            flex-direction: column;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 1.5rem;
+            flex-grow: 1; /* Allow container to grow */
+        }
+        .card {
+            /* Glassmorphism effect */
+            background-color: rgba(255, 255, 255, 0.08); /* Very subtle transparent white */
+            backdrop-filter: blur(10px); /* Blur effect */
+            -webkit-backdrop-filter: blur(10px); /* For Safari */
+            border-radius: 1rem;
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+            padding: 2rem;
+            margin-bottom: 2.5rem;
+            border: 1px solid rgba(255, 255, 255, 0.15); /* Lighter, semi-transparent border */
+            transition: transform 0.3s ease, box-shadow 0.3s ease, background-color 0.3s ease;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 40px rgba(0, 0, 0, 0.2), 0 0 20px rgba(255, 255, 255, 0.1); /* Slightly more prominent shadow on hover */
+            background-color: rgba(255, 255, 255, 0.12); /* Slightly more opaque on hover */
+        }
+        .section-title {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #ffffff; /* White for titles */
+            margin-bottom: 1.5rem;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.3); /* Subtle white underline */
+            padding-bottom: 0.5rem;
+        }
+        .subsection-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #ffffff; /* White */
+            margin-top: 1.5rem;
+            margin-bottom: 1rem;
+        }
+        /* Main Title styling (no animation, no glow) */
+        .main-title {
+            font-family: 'Mplus 1', sans-serif;
+            font-size: 2.5rem; /* Smaller font size */
+            font-weight: 700;
+            color: #ffffff; /* White */
+            letter-spacing: 0.1em;
+            cursor: pointer; /* Indicate interactivity */
+            position: relative; /* For ripple effect */
+            overflow: hidden; /* Hide overflowing ripple */
+            display: inline-block; /* Allow sizing for overflow */
+            padding: 0.5rem 1rem; /* Add some padding for ripple */
+            border-radius: 0.5rem;
+            transition: background-color 0.3s ease;
+            filter: none; /* Ensure no initial filter */
+            transform: none; /* Ensure no initial transform */
+            transition: filter 0.5s ease-out, transform 0.5s ease-out; /* Smooth transition for distortion */
+        }
+        .main-title:hover {
+            background-color: rgba(255, 255, 255, 0.05); /* Subtle background on hover */
+        }
+
+        /* Ripple effect */
+        .ripple {
+            position: absolute;
+            border-radius: 50%;
+            background-color: rgba(255, 255, 255, 0.3); /* White transparent ripple */
+            transform: scale(0);
+            opacity: 1;
+            pointer-events: none; /* Allow clicks to pass through */
+            animation: ripple-animation 0.6s linear forwards;
+        }
+
+        @keyframes ripple-animation {
+            from {
+                transform: scale(0);
+                opacity: 1;
+            }
+            to {
+                transform: scale(1.5); /* Expand more */
+                opacity: 0;
+            }
+        }
+
+        /* Text distortion effect */
+        .main-title.distort {
+            filter: url(#wavyFilter); /* Apply SVG filter for distortion */
+            transform: scale(1.02, 0.98); /* Subtle squash/stretch */
+        }
+
+        /* Hide SVG for filter definition */
+        .svg-filters {
+            position: absolute;
+            width: 0;
+            height: 0;
+            overflow: hidden;
+        }
+
+        /* ヒートマップのセル色 (寒色-暖色グラデーション) */
+        .heatmap-table th, .heatmap-table td {
+            transition: background-color 0.3s ease, border-color 0.3s ease;
+            border-color: rgba(255, 255, 255, 0.1); /* Subtle border for heatmap cells */
+            backdrop-filter: blur(5px); /* Blur for cells */
+            -webkit-backdrop-filter: blur(5px);
+            background-image: linear-gradient(135deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.05)); /* Default transparent base */
+        }
+        /* Cold colors (low score) - Blue/Purple shades with transparency */
+        .score-low-hm { background-image: linear-gradient(135deg, rgba(66, 133, 244, 0.2), rgba(156, 39, 176, 0.2)); } /* Blue to Purple */
+        .score-mid-low-hm { background-image: linear-gradient(135deg, rgba(66, 133, 244, 0.3), rgba(156, 39, 176, 0.3)); } /* Deeper Blue to Purple */
+        /* Medium color - Transition between purple and red */
+        .score-medium-hm { background-image: linear-gradient(135deg, rgba(156, 39, 176, 0.3), rgba(234, 67, 53, 0.3)); } /* Purple to Red */
+        /* Warm colors (high score) - Red/Orange shades with transparency */
+        .score-mid-high-hm { background-image: linear-gradient(135deg, rgba(234, 67, 53, 0.3), rgba(255, 153, 0, 0.3)); } /* Red to Orange */
+        .score-high-hm { background-image: linear-gradient(135deg, rgba(234, 67, 53, 0.5), rgba(255, 153, 0, 0.5)); } /* Deeper Red to Orange */
+
+
+        /* アコーディオン */
+        .accordion-header {
+            background-color: rgba(255, 255, 255, 0.08); /* Transparent white */
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+            color: #e0f2fe;
+            padding: 1rem 1.5rem;
+            border-radius: 0.75rem;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            transition: background-color 0.3s ease, transform 0.2s ease, border-color 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.15); /* Subtle border */
+        }
+        .accordion-header:hover {
+            background-color: rgba(255, 255, 255, 0.15); /* Slightly more opaque on hover */
+            transform: translateY(-2px);
+            border-color: rgba(255, 255, 255, 0.3); /* Lighter border on hover */
+        }
+        .accordion-content {
+            background-color: rgba(255, 255, 255, 0.05); /* Even more transparent for content */
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-top: none;
+            border-radius: 0 0 0.75rem 0.75rem;
+            /* Initial state: hidden */
+            max-height: 0;
+            padding-top: 0;
+            padding-bottom: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease-out, padding 0.5s ease-out;
+        }
+        .accordion-content.active {
+            max-height: 1000px; /* Adjust as needed for content */
+            padding: 1.5rem;
+        }
+        .accordion-icon {
+            transition: transform 0.3s ease;
+        }
+        .accordion-icon.rotate {
+            transform: rotate(90deg);
+        }
+
+        /* スコアリング基準のインフォグラフィック */
+        .infographic-item {
+            background-color: rgba(255, 255, 255, 0.08); /* Glassmorphism for infographic items */
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease, background-color 0.3s ease;
+        }
+        .infographic-item:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2), 0 0 10px rgba(255, 255, 255, 0.1);
+            background-color: rgba(255, 255, 255, 0.12);
+        }
+        .infographic-item h3 {
+            color: #ffffff;
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-bottom: 0.75rem;
+        }
+        .infographic-item p {
+            color: #e0f2fe;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body class="antialiased">
+    <div class="container" id="top">
+        <header class="text-center py-8">
+            <h1 class="main-title mb-2">生活者価値デザイン研修プログラム</h1>
+            <p class="text-2xl text-white mb-1">メタジェン社 課題</p>
+            <p class="text-xl text-white">提出締め切り: 8月4日 13:00</p>
+        </header>
+
+        <!-- 宮井講師からのコメント -->
+        <section class="card">
+            <h2 class="section-title">宮井講師からのコメント</h2>
+            <div class="flex flex-col md:flex-row items-center md:items-start gap-6 text-white">
+                <img src="https://mirai-biz.jp/wp-content/uploads/2022/03/miyai_color.png" alt="宮井講師" class="w-32 h-32 md:w-40 md:h-40 rounded-full object-cover border-2 border-white shadow-lg flex-shrink-0">
+                <div>
+                    <p class="mb-4">
+                        本ケースについては、事業視点での業務設計・提案を理解してもらうため、以下の点に留意して作成を行った。
+                    </p>
+                    <ul class="list-disc list-inside mb-4 ml-4">
+                        <li>事業をすでに構築した大手企業ではなくこれから事業を構築しようとしているスタートアップ企業の実例を用いる</li>
+                        <li>事業視点を身につけるために、事業視点をもたざるを得ないプレイヤー=創業社長に寄り添うという場面設定としている</li>
+                        <li>事業視点での検討とは、限られたリソースを投入していくための意思決定を行うために、事業を取り巻く要素を総合的に俯瞰し、優先順位をつけて検討することであると言える。</li>
+                    </ul>
+                    <p>
+                        したがって、本回答では、「事業を取り巻く要素を俯瞰的に検討できたか?」を振り返ってほしい。以下に、俯瞰的な要素を質問例とともに示す。特に重要なものには★を付与したので、この視点を持ってペライチを考えられいたかどうか、ぜひ振り返っていただきたい。
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- SVG Filters for text distortion -->
+        <svg class="svg-filters">
+            <filter id="wavyFilter">
+                <feTurbulence type="fractalNoise" baseFrequency="0.005 0.005" numOctaves="1" result="turb" seed="0"/>
+                <feDisplacementMap in="SourceGraphic" in2="turb" scale="0" xChannelSelector="R" yChannelSelector="G" result="displacement"/>
+                <feGaussianBlur in="displacement" stdDeviation="0" result="blur"/>
+                <feMerge>
+                    <feMergeNode in="SourceGraphic"/>
+                    <feMergeNode in="blur"/>
+                </feMerge>
+            </filter>
+        </svg>
+
+        <section class="card">
+            <h2 class="section-title">スコアリング基準</h2>
+            <p class="mb-8 text-white">
+                本課題は、受講者の「事業成長パートナー」としての視点から提出物を評価しています。以下の3つの主要な評価軸に基づき、スコア化/偏差値化を行っています。
+            </p>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="infographic-item">
+                    <h3>1. 視点の網羅性・深掘り度</h3>
+                    <p>一次回答で提示された75の視点（特に★マークの重要視点）に対し、どれだけ広範に、そして深く言及できているかを評価します。</p>
+                </div>
+                <div class="infographic-item">
+                    <h3>2. 経営視点との連動性</h3>
+                    <p>単なる施策提案に留まらず、経営・事業戦略、ファイナンス、組織といった上位の経営課題と、提案がどのように連動しているかを評価します。</p>
+                </div>
+                <div class="infographic-item">
+                    <h3>3. 実践的思考力・時間配分</h3>
+                    <p>A4ペライチ、30分間のMTG（実質20分）という限られた制約の中で、最も重要な情報を絞り込み、効果的な議論を導き出せる情報設計能力を評価します。</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="card">
+            <h2 class="section-title">受講者全体の分布マップ</h2>
+            <p class="mb-6 text-white">
+                全受講者の総合スコア（X軸）と、特に重要な★マーク視点への言及数スコア（Y軸）をプロットした散布図です。
+                あなたの位置付けや、グループ全体の傾向を把握できます。
+            </p>
+            <div class="h-96 w-full">
+                <canvas id="overallScatterChart"></canvas>
+            </div>
+        </section>
+
+        <section class="card">
+            <h2 class="section-title">全体の視点ヒートマップ</h2>
+            <p class="mb-6 text-white">
+                全受講者の各視点カテゴリにおけるスコアをヒートマップで可視化。
+                <span class="font-medium text-red-400">暖色系（赤〜オレンジ）が高評価</span>、<span class="font-medium text-blue-400">寒色系（青系）が手薄になっている視点</span>であることを示す。
+            </p>
+
+            <div class="overflow-x-auto rounded-lg shadow-sm">
+                <table class="min-w-full bg-transparent border border-white border-opacity-20 heatmap-table">
+                    <thead>
+                        <tr>
+                            <th class="py-3 px-4 bg-white bg-opacity-10 text-left text-xs font-semibold text-white uppercase tracking-wider rounded-tl-lg">受講者名</th>
+                            <th class="py-3 px-4 bg-white bg-opacity-10 text-left text-xs font-semibold text-white uppercase tracking-wider" title="A. 経営・事業戦略">A</th>
+                            <th class="py-3 px-4 bg-white bg-opacity-10 text-left text-xs font-semibold text-white uppercase tracking-wider" title="B. ファイナンス・ガバナンス・法務">B</th>
+                            <th class="py-3 px-4 bg-white bg-opacity-10 text-left text-xs font-semibold text-white uppercase tracking-wider" title="C. BtoB/BtoC戦略とサービス開発">C</th>
+                            <th class="py-3 px-4 bg-white bg-opacity-10 text-left text-xs font-semibold text-white uppercase tracking-wider" title="D. ヘルスケアマーケティングと信頼構築">D</th>
+                            <th class="py-3 px-4 bg-white bg-opacity-10 text-left text-xs font-semibold text-white uppercase tracking-wider" title="E. 組織・人材・パートナーシップ">E</th>
+                            <th class="py-3 px-4 bg-white bg-opacity-10 text-left text-xs font-semibold text-white uppercase tracking-wider" title="F. 博報堂の存在意義">F</th>
+                            <th class="py-3 px-4 bg-white bg-opacity-10 text-left text-xs font-semibold text-white uppercase tracking-wider" title="G. ブランディング・クリエイティブ">G</th>
+                            <th class="py-3 px-4 bg-white bg-opacity-10 text-left text-xs font-semibold text-white uppercase tracking-wider" title="H. 広告・プロモーション">H</th>
+                            <th class="py-3 px-4 bg-white bg-opacity-10 text-left text-xs font-semibold text-white uppercase tracking-wider rounded-tr-lg" title="I. デジタル・顧客体験">I</th>
+                        </tr>
+                    </thead>
+                    <tbody id="heatmap-body" class="divide-y divide-white divide-opacity-10">
+                        <!-- JavaScriptでここにヒートマップの行を生成 -->
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <section class="card">
+            <h2 class="section-title">個別フィードバック</h2>
+            <p class="mb-6 text-white">
+                あなたの提出物に対する詳細なフィードバックです。名前をクリックして内容をご確認ください。
+            </p>
+
+            <div id="individual-feedbacks-accordion">
+                <!-- JavaScriptでここにアコーディオン項目を生成 -->
+            </div>
+        </section>
+
+        <section class="card">
+            <h2 class="section-title">メタジェン社 課題と一次回答</h2>
+            <div class="accordion-item">
+                <div class="accordion-header" onclick="toggleAccordion(this)" data-target="challenge-content">
+                    <span>課題内容と一次回答を表示</span>
+                    <svg class="accordion-icon w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                </div>
+                <div class="accordion-content" id="challenge-content">
+                    <h3 class="subsection-title">ケース課題</h3>
+                    <div class="text-white mb-4 overflow-y-auto max-h-64">
+                        <p>
+                            本来であれば、本日、あなたはチームメンバーと共にメタジェン社の福田社長へご挨拶と初期ヒアリングに伺う予定でした。しかし、急な事情が重なり、チームで訪問することが不可能に。<br><br>
+                            「君が代表して、一人で社長にヒアリングし、今後の提案の方向性を探ってきてほしい」<br><br>
+                            上司からそう指示されたあなた。与えられた時間は30分。この重要な最初のコンタクトで、あなたは福田社長から何を引き出し、どのような初期提案の可能性を示すべきでしょうか。質問を書くべきでしょうか? 初期的なアイデアを当ててみるべきでしょうか? 他に必要なものがあるのでしょうか?<br><br>
+                            A4ペライチしか持っていけないという想定で、ペライチを作成してみてください。
+                        </p>
+                    </div>
+
+                    <h3 class="subsection-title">一次回答（全文）</h3>
+                    <div class="text-white mb-2 overflow-y-auto max-h-96">
+                        <p>
+                            **[メタジェン社について]**<br>
+                            メタジェン株式会社は、腸内環境に関する最先端の研究と技術を基盤に、個人の健康課題を解決する革新的ヘルスケアソリューションを提供する企業である。2015年に設立、腸内フローラ（＝腸内細菌叢：そう）の解析と活用を中心に事業を展開している。同社のミッションは、「腸内環境に合ったヘルスケアをあたりまえにする」というビジョンの実現である。<br>
+                            メタジェンは、「腸内デザイン」という独自の概念を提唱している。この概念は、腸内フローラを解析し、それに基づく個別化医療や予防医療の提供を通じて、より健康的な生活を実現するものである。<br>
+                            同社の事業は、個人の健康課題を解決するだけでなく、医療機関や研究機関、さらには企業と連携することで、腸内環境を基盤とした新しい医療や健康サービスを社会に浸透させることを目的としている。市場の規模に関しては様々な統計が存在するが健康食品・サプリメントだけをとっても全世界で2030年までに25兆円から30兆円程度の規模に成長すると言われる有望市場である。<br>
+                            メタジェン社の代表取締役である福田は腸内環境制御学を専門とし自らのビジネスプランをもとにメタジェンを創業した。また、創業以来、外部からの資金に頼らず経営を軌道に乗せている所謂ブートストラップによるスタートアップである。<br>
+                            現在当社と福田は慶応先端研と博報堂DYホールディングスの包括連携協定をきっかけとして協業の検討に入ったフェーズであり、博報堂のケイパビリティを活かした有力な提案を期待されている。
+                        </p>
+                        <br>
+                        <p>
+                            **[一次回答]**<br>
+                            本ケースについては、事業視点での業務設計・提案を理解してもらうため、以下の点に留意して作成を行った。<br>
+                            - 事業をすでに構築した大手企業ではなくこれから事業を構築しようとしているスタートアップ企業の実例を用いる<br>
+                            - 事業視点を身につけるために、事業視点をもたざるを得ないプレイヤー=創業社長に寄り添うという場面設定としている<br>
+                            - 事業視点での検討とは、限られたリソースを投入していくための意思決定を行うために、事業を取り巻く要素を総合的に俯瞰し、優先順位をつけて検討することであると言える。<br><br>
+                            したがって、本回答では、「事業を取り巻く要素を俯瞰的に検討できたか?」を振り返ってほしい。以下に、俯瞰的な要素を質問例とともに示す。特に重要なものには★を付与したので、この視点を持ってペライチを考えられいたかどうか、ぜひ振り返っていただきたい。<br><br>
+                            **A.経営・事業戦略**<br>
+                            1.★事業ポートフォリオの優先順位:「研究開発支援」「層別化ヘルスケア」「創薬」の3領域で、今後3~5年のリソース配分と戦略的プライオリティをどう置くか?<br>
+                            2.「腸内デザイン」の知財戦略:「腸内デザイン」という概念を、事業やブランドの経済的価値にどう転換するか?特許や商標以外の「知的資産」の構築と防衛戦略は?<br>
+                            3.グローバル戦略の解像度:シンガポール法人設立の先にある、具体的な海外展開のロードマップは?最初の攻略市場(国・地域)と、その選定理由は何か?<br>
+                            4.★真の競合の定義:競合は他の腸内フローラ研究企業か、大手製薬会社か、食品メーカーか、それともGAFAのようなデータプラットフォーマーか?<br>
+                            5.創薬事業のシナジーとリスク:メタジェンセラピューティクスはグループ全体の希望か、リスクか?本体事業とのシナジーとリスクヘッジの関係性をどう整理しているか?<br>
+                            6.★究極のゴール (ExitStrategy):会社の最終的な目標は何か?IPOか、M&Aか、あるいは永続的な研究開発企業体を目指すのか?<br>
+                            7.★ビジネスモデルの定義:メタジェンのコアコンピタンスは「研究力」「データ解析力」「サービス開発力」のうちどれか?自らを「研究企業」「データカンパニー」「ヘルスケア企業」のどれと定義するか?そもそもどのようなビジネスモデルか?<br>
+                            8.成長のボトルネック:会社の規模を10倍にする上で、最大の制約条件は何か?「技術」「人材」「資金」「法規制」「市場の受容性」のうち、どれか?<br>
+                            9.経営者の時間配分:研究者であり経営者である福田社長が、今後最も時間を投資したい領域はどこか?逆に、誰かに任せたい領域は何か?<br>
+                            10.失敗からの学び:これまで着手したものの、事業化に至らなかったプロジェクトはあるか?そこから得られた最大の教訓は何か?<br>
+                            11.キャズムの克服戦略:一部の先進的な層(アーリーアダプター)から、より広い一般層(マジョリティ)へ市場を拡大する際の「深い溝(キャズム)」をどう乗り越えるか?<br>
+                            12.★ピボットの可能性:現在の事業モデルや戦略に固執するのではなく、市場の反応を見ながら事業の方向性を転換(ピボット)する可能性は視野に入れているか?<br>
+                            13.★スケールの壁への備え:事業が急成長した際の「スケールの壁」(検査体制のキャパシティ、顧客サポート、データ基盤の安定性)にどう備え、投資するか?<br>
+                            14.★創業者のジレンマ:創業者の強力なビジョンを維持しつつ、事業の成長に合わせて組織構造や権限委譲をどうアップデートしていくか?<br>
+                            **B.ファイナンス・ガバナンス・法務**<br>
+                            15.【ファイナンス】「ブートストラップ経営」の次の一手:自己資金経営の強みを活かしつつ、次なる成長を加速させるための最適な資本政策は?<br>
+                            16.【ファイナンス】資金調達先の選定思想:もし外部資本を入れるなら、どのようなパートナー(純投資家のVC、事業シナジーを求めるCVCや事業会社)を理想とするか?<br>
+                            17.【ファイナンス】企業価値の伝え方:安定収益が見込める研究支援事業と、ハイリスク・ハイリターンな創薬事業を組み合わせ、投資家にどう企業価値を説明するか?<br>
+                            18.【ファイナンス】資金使途の明確化:例えば50億円の資金調達が実現した場合、その具体的な使途(研究開発、人材採用、M&A、海外展開)の優先順位は?<br>
+                            19.【アカウンティング】研究開発費のROI:複数走る研究開発プロジェクトの投資対効果をどう測定し、経営判断に活かしているか?<br>
+                            20.★【アカウンティング】公的資金の活用:国や公的機関(AMED、NEDO等)の研究開発助成金や補助金を、戦略的に獲得するための専門チームやノウハウはあるか?<br>
+                            21.★【アカウンティング】コスト構造の最適化:検査キットの原価、データ解析の費用など、事業のコスト構造における最大の課題と、その削減余地はどこにあるか?<br>
+                            22.★【ロビイング】市場創造のためのルールメイキング:黎明期の市場だからこそ、業界の健全な発展のために、どのようなルールや自主基準作りを主導していきたいか?<br>
+                            23.【ロビイング】FMTの社会実装に向けた働きかけ:FMT(糞便微生物移植)やマイクロバイオームバンクの普及に向けて、厚生労働省など規制当局への働きかけや、関連学会との連携をどう進めるか?<br>
+                            24.【法務】表示・広告規制への対応:健康食品やヘルスケアサービスの「効果・効能」に関する広告・表示規制(薬機法、景品表示法など)をどうクリアし、生活者に価値を伝えるか?<br>
+                            25.【法務】データ利活用の法整備:個人情報保護法や次世代医療基盤法など、ヘルスケアデータの利活用に関する法律の今後の動向をどう予測し、先手を打つか?<br>
+                            26.【ガバナンス】倫理的課題への備え:腸内環境データに基づく差別や、FMTの倫理的問題など、将来起こりうる社会的・倫理的課題に対し、どのような社内体制(倫理委員会等)で備えるか?<br>
+                            **C.BtoB/BtoC両面戦略とサービス開発**<br>
+                            27.「BodyGranola」の次なる展開:カルビー社との共同開発の成功要因と課題は?次の層別化プロダクトは「食品」か、それ以外の領域(化粧品、ペットフード等)か?<br>
+                            28.★科学のUX/UIデザイン:複雑な検査結果を、恐怖や無力感ではなく「自分ゴト化」と「行動変容」に繋げるための情報デザイン・体験デザインとは?<br>
+                            29.「脳腸相関」の事業化:気分や意欲への影響という「脳腸相関」の研究を、メンタルヘルスケアや組織開発、教育分野の具体的なサービスとしてどう事業化するか?<br>
+                            30.データそのものの収益化:膨大な匿名加工データを、新たなインサイトとして製薬・食品企業や保険会社、自治体等に提供するデータソリューション事業は考えられるか?<br>
+                            31.医療現場への浸透:医師や管理栄養士が、患者や顧客にメタジェンのサービスを「処方」したくなるような、医療連携の仕組みやツールは何か?<br>
+                            32.ヘルスケアの再定義:治療だけでなく「未病・予防」領域で、保険会社や自治体と組み、人々の健康寿命延伸と社会保障費抑制に貢献する事業モデルは?<br>
+                            33.★顧客との継続的関係:Body Granolaの定期購買のように、一度きりの検査で終わらない、顧客とのエンゲージメントを高め続ける仕組みは?<br>
+                            34.★データシナジー戦略:B2C事業で得られた貴重な生活者データを、B2Bの研究開発支援事業や創薬事業の価値向上にどう戦略的に繋げるか?<br>
+                            35.ブランド人格の両立:B2Bの「科学的・専門的」なブランドイメージと、B2Cの「親しみやすい・身近な」ブランドイメージを、どう両立・使い分け、全体のブランド価値を高めるか?<br>
+                            36.★BtoBtoCモデルの確立:パートナー企業(食品メーカー、保険会社、スポーツジム等)を経由して生活者に価値を届ける「BtoBtoCモデル」の最適なパートナーシップ形態と収益モデルは何か?<br>
+                            37.社内リソース配分:顧客接点やビジネスモデルが全く異なるB2BとB2C、それぞれの営業・マーケティング部門に、人材や予算をどう最適配分するか?<br>
+                            38.サービスの価格戦略:提供する価値(健康、QOL向上)を、どのように価格に反映させているか?価格の妥当性をどう検証しているか?<br>
+                            **D.ヘルスケアマーケティングと信頼構築**<br>
+                            39.倫理的コミュニケーション基準:薬機法などの法律遵守は当然として、生活者の期待を過度に煽ったり、誤解を招いたりしないための、独自の倫理的なコミュニケーション基準は何か?<br>
+                            40.「効果の個人差」の伝え方:避けられない「効果の個人差」を、顧客の不満やクレームではなく、個別化の価値や、自分を知るきっかけとしてポジティブに伝えるにはどうすれば良いか?<br>
+                            41.医療従事者からの信頼獲得:医療従事者が、自身の患者に安心して推奨できるための「信頼のパッケージ」(学術論文、臨床データ、導入事例、専門家向けセミナー等)をどう構築し、提供するか?<br>
+                            42.★習慣化の価値訴求:短期的な効果を求めがちな生活者に対し、長期的な健康管理の重要性をどう伝え、サービス利用の「習慣化」を促すか?<br>
+                            43.信頼と認知の同時獲得:限られた予算の中で、無名のスタートアップがブランドの「認知度」と「科学的な信頼性」を同時に、かつ効率的に構築するための最優先事項は何か?<br>
+                            44.★社会実装の最大の壁:研究成果の社会実装において、最大の障壁は「技術」「法律」「コスト」「生活者の意識」のうち、どれか?<br>
+                            45.★生活者との共創コミュニティ:生活者を単なる「消費者」ではなく、研究開発やアイデア創出に参加する「パートナー」として巻き込む仕組みは作れないか?<br>
+                            46.パブリックヘルスへの貢献:蓄積されたデータを、国や自治体の公衆衛生政策や未来の医療・食育にどう貢献させられるか?<br>
+                            **E.組織・人材・パートナーシップ**<br>
+                            47.研究者集団の組織文化:博士号を持つ専門家集団という強みが、逆にビジネスのスピード感や意思決定の柔軟性を損なう場面はないか?<br>
+                            48.★採用したい人材像:今のメタジェンに「喉から手が出るほど欲しい」人材は、どのようなスキルやマインドを持つ人物か?<br>
+                            49.ビジョンの浸透:福田社長の創業の想いやビジョンを、全社員が自分の言葉で語れるようにするために、どのような取り組みが必要か?<br>
+                            50.部門間連携の触媒:研究、事業開発、マーケティングなど、専門性の高い部署間のサイロ化を防ぎ、連携を促進するための仕組みは?<br>
+                            51.パートナーシップの哲学:カルビーなど、外部と協業する上で最も大切にしていることは何か?逆にパートナー選びで失敗した経験は?<br>
+                            52.意思決定のメカニズム:企業の成長に伴い、今後、意思決定の権限委譲やプロセスをどのようにデザインしていくか?<br>
+                            53.アカデミアとの永続的関係:大学発ベンチャーとして、今後アカデミア(大学、研究機関)とどのような関係(共同研究、人材輩出等)を築いていくのが理想か?<br>
+                            54.★投資家へのストーリーテリング:将来の投資家に対し、メタジェンの価値を「サイエンス」だけでなく、「ビジネス」「社会課題解決」の物語としてどう語るか?<br>
+                            **F.博報堂の存在意義**<br>
+                            55.博報堂の収益化:ベンチャー企業で大きな発注が見込めない中、どのような手順で、どのくらいの金額をいつまでに稼ぐか?<br>
+                            56.博報堂アセットの非広告的活用:博報堂の生活者データ、クリエイター、事業開発部門、CVC(ベンチャーキャピタル)などを、広告以外の目的でどう活用したいか?<br>
+                            57.「生活者発想」の注入:研究者中心の組織に、博報堂の強みである「生活者発想」をインストールすることで、どのような化学反応を期待するか?<br>
+                            58.社長の「壁打ち相手」:福田社長が社内では相談しにくい経営の悩みや壮大な構想を、利害なく議論できる「社外の片腕」のような存在を求めていないか?<br>
+                            59.ジョイントベンチャーの可能性:特定の事業領域において、メタジェンと博報堂が共同で新会社(JV)を設立し、リスクとリターンを共有しながら事業を推進する選択肢は考えられないか?<br>
+                            60.最初の小さな成功(SmallWin):壮大な協業の前に、まず半年以内に具体的な成果を出せる「お試しプロジェクト」として、どのようなテーマが考えられるか?<br>
+                            **G.ブランディング・クリエイティブ**<br>
+                            61.タグライン開発:「腸内デザイン」という概念を、生活者が直感的に理解し、自分ゴト化できるキャッチーなタグラインは何か?<br>
+                            62.ブランドストーリーの構築:福田社長の創業ストーリーや研究者の情熱を、生活者の共感を呼ぶ「物語」としてどう描き、伝えていくか?<br>
+                            63.ネーミング・ロゴ戦略:BtoC展開を見据えた際、一般生活者にとって親しみやすいサービス名やブランド名は必要か?ロゴは科学的な信頼性と生命の躍動感を両立できているか?<br>
+                            64.キービジュアル開発:メタジェンが提供する価値(健康、解放感、未来感)を象徴する、強力なキービジュアル(写真やイラスト)はどのようなものか?<br>
+                            65.ムービーコンテンツ企画:専門的な技術や脳腸相関の概念を、数分の動画で分かりやすく解説するアニメーションや、ドキュメンタリータッチのブランドムービーは有効か?<br>
+                            **H.広告・プロモーション**<br>
+                            66.統合キャンペーン企画:世の中の機運を盛り上げる統合的な広告キャンペーンは考えられないか?<br>
+                            67.メディアプランニング:ターゲット層(健康不安層、予防意識層、経営者など)に最も効率的・効果的にリーチするためのメディアミックス(TV、デジタル、雑誌、OOH)は?<br>
+                            68.インフルエンサー戦略:信頼性が重要なこの領域で、起用すべきインフルエンサーは誰か?(専門家、医師、科学コミュニケーター、ライフスタイル系インフルエンサーなど)<br>
+                            69.PR戦略:メディアがニュースとして取り上げたくなるPRの切り口は何か?("日本初の○○" "社会課題解決" "最新研究成果"など)<br>
+                            70.販売促進策:「BodyGranola」のトライアルを促進するためのサンプリングや、初回購入割引、定期購入へのインセンティブ設計は?<br>
+                            **I.デジタル・顧客体験**<br>
+                            71.オウンドメディア戦略:検査後のマイページや情報サイトを、単なる結果通知の場から、継続的な健康管理をサポートするエンゲージメントのハブにするにはどうすればよいか?<br>
+                            72.SNSアカウント活用:各SNS(Instagram, X, Facebook, YouTube)の特性を活かし、どのようなコンテンツを発信し、どのようなコミュニティを形成すべきか?<br>
+                            73.CRMシナリオ設計:顧客の検査結果や購買履歴に応じて、パーソナライズされた情報提供や次のアクションを促すメール・LINEのシナリオは?<br>
+                            74.WEBサイトの改善:コーポレートサイトやサービスサイトのUI/UXを改善し、コンバージョン(検査申込、資料請求)を最大化するにはどうすべきか?<br>
+                            75.顧客インサイトの発見:ターゲットとなる生活者の、腸に関する「不満・不安・不便」の裏にある、本人も気づいていない深層心理(インサイト)は何か?
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <footer class="text-center py-8 text-white text-opacity-70 text-sm">
+            <a href="#top" class="text-white hover:text-white hover:opacity-100 transition-opacity duration-300">トップへ戻る</a>
+            <p class="mt-2">&copy; 2025 生活者価値デザイン研修プログラム事務局</p>
+        </footer>
+    </div>
+
+    <script>
+        // Chart.jsのデータラベルプラグインを登録
+        Chart.register(ChartDataLabels);
+
+        // データ読み込みと初期化
+        let categories = [];
+        let categoryLabels = {};
+        let importantPoints = {};
+        let maxTheoreticalImportantPoints = 0;
+        let participantsData = [];
+        let participantsList = [];
+
+        // スコアを偏差値化するヘルパー関数 (簡易版)
+        function calculateZScore(score, mean, stdDev) {
+            if (stdDev === 0) return 50; // 標準偏差が0の場合は平均値に固定
+            return ((score - mean) / stdDev) * 10 + 50; // Zスコアを偏差値に変換
+        }
+
+        // データを読み込む関数
+        async function loadData() {
+            try {
+                // メタデータを読み込み
+                const metadataResponse = await fetch('metadata.json');
+                const metadata = await metadataResponse.json();
+                
+                categories = Object.keys(metadata.categories);
+                categoryLabels = metadata.categories;
+                importantPoints = metadata.important_points;
+                maxTheoreticalImportantPoints = metadata.max_theoretical_important_points;
+
+                // 参加者リストを読み込み
+                const participantsResponse = await fetch('participants_list.json');
+                const participantsData = await participantsResponse.json();
+                participantsList = participantsData.participants;
+
+                // 評価データを読み込み
+                const evaluationResponse1 = await fetch('evaluation_data_part1.json');
+                const evaluationData1 = await evaluationResponse1.json();
+                
+                const evaluationResponse2 = await fetch('evaluation_data_part2.json');
+                const evaluationData2 = await evaluationResponse2.json();
+
+                // 評価データを統合
+                const allEvaluations = [...evaluationData1.evaluations, ...evaluationData2.evaluations];
+                
+                // 参加者リストと評価データを統合
+                participantsData = participantsList.map(participant => {
+                    const evaluation = allEvaluations.find(eval => eval.name === participant.name);
+                    
+                    if (evaluation) {
+                        // 評価済みの場合
+                        return {
+                            name: participant.name,
+                            department: participant.department,
+                            submitted: true,
+                            overallScore: evaluation.overall_score,
+                            importantPointCount: evaluation.important_points_score,
+                            scores: evaluation.scores,
+                            feedback: evaluation.feedback,
+                            word_count: evaluation.word_count
+                        };
+                    } else {
+                        // 未提出の場合
+                        return {
+                            name: participant.name,
+                            department: participant.department,
+                            submitted: false,
+                            overallScore: 0,
+                            importantPointCount: 0,
+                            scores: Object.fromEntries(categories.map(cat => [cat, 0])),
+                            feedback: {
+                                good: "未提出のため評価できません。",
+                                improve: "提出期限までに課題を提出してください。",
+                                advice: "提出後、詳細なフィードバックが表示されます。"
+                            },
+                            word_count: 0
+                        };
+                    }
+                });
+
+                // データ読み込み完了後、チャートとUIを初期化
+                initializeChartsAndUI();
+                
+            } catch (error) {
+                console.error('データの読み込みに失敗しました:', error);
+                // エラー時のフォールバック処理
+                alert('データの読み込みに失敗しました。ページを再読み込みしてください。');
+            }
+        }
+
+        // チャートとUIを初期化する関数
+        function initializeChartsAndUI() {
+            // 各カテゴリの平均と標準偏差を計算
+            const categoryStats = {};
+            const overallScores = participantsData.map(p => p.overallScore);
+            const overallMean = overallScores.reduce((a, b) => a + b, 0) / overallScores.length;
+            const overallStdDev = Math.sqrt(overallScores.reduce((sum, score) => sum + Math.pow(score - overallMean, 2), 0) / overallScores.length);
+
+            const importantPointCounts = participantsData.map(p => p.importantPointCount);
+            const importantPointMean = importantPointCounts.reduce((a, b) => a + b, 0) / importantPointCounts.length;
+            const importantPointStdDev = Math.sqrt(importantPointCounts.reduce((sum, count) => sum + Math.pow(count - importantPointMean, 2), 0) / importantPointCounts.length);
+
+            const averageScores = {}; // 全受講者のカテゴリ別平均スコア
+            categories.forEach(cat => {
+                const scores = participantsData.map(p => p.scores[cat]);
+                const sum = scores.reduce((a, b) => a + b, 0);
+                const mean = sum / scores.length;
+                const variance = scores.reduce((sum, score) => sum + Math.pow(score - mean, 2), 0) / scores.length;
+                const stdDev = Math.sqrt(variance);
+                categoryStats[cat] = { mean, stdDev };
+                averageScores[cat] = mean;
+            });
+
+            // 散布図の描画
+            createScatterChart('overallScatterChart', overallMean, overallStdDev, importantPointMean, importantPointStdDev);
+            
+            // ヒートマップの生成
+            generateHeatmap(categoryStats);
+            
+            // 個別フィードバックアコーディオンの生成
+            generateIndividualFeedbacks(categoryStats);
+        }
+
+        // 各カテゴリの平均と標準偏差を計算
+        const categoryStats = {};
+        const overallScores = participantsData.map(p => p.overallScore);
+        const overallMean = overallScores.reduce((a, b) => a + b, 0) / overallScores.length;
+        const overallStdDev = Math.sqrt(overallScores.reduce((sum, score) => sum + Math.pow(score - overallMean, 2), 0) / overallScores.length);
+
+        const importantPointCounts = participantsData.map(p => p.importantPointCount);
+        const importantPointMean = importantPointCounts.reduce((a, b) => a + b, 0) / importantPointCounts.length;
+        const importantPointStdDev = Math.sqrt(importantPointCounts.reduce((sum, count) => sum + Math.pow(count - importantPointMean, 2), 0) / importantPointCounts.length);
+
+
+        const averageScores = {}; // 全受講者のカテゴリ別平均スコア
+        categories.forEach(cat => {
+            const scores = participantsData.map(p => p.scores[cat]);
+            const sum = scores.reduce((a, b) => a + b, 0);
+            const mean = sum / scores.length;
+            const variance = scores.reduce((sum, score) => sum + Math.pow(score - mean, 2), 0) / scores.length;
+            const stdDev = Math.sqrt(variance);
+            categoryStats[cat] = { mean, stdDev };
+            averageScores[cat] = mean;
+        });
+
+        // スパイダーチャート描画関数
+        function createSpiderChart(canvasId, participantScores) {
+            const ctx = document.getElementById(canvasId).getContext('2d');
+            
+            // カテゴリ統計を計算
+            const categoryStats = {};
+            const averageScores = {};
+            categories.forEach(cat => {
+                const scores = participantsData.map(p => p.scores[cat]);
+                const sum = scores.reduce((a, b) => a + b, 0);
+                const mean = sum / scores.length;
+                const variance = scores.reduce((sum, score) => sum + Math.pow(score - mean, 2), 0) / scores.length;
+                const stdDev = Math.sqrt(variance);
+                categoryStats[cat] = { mean, stdDev };
+                averageScores[cat] = mean;
+            });
+            
+            const participantData = categories.map(cat => {
+                const { mean, stdDev } = categoryStats[cat];
+                return calculateZScore(participantScores[cat], mean, stdDev);
+            });
+            const averageData = categories.map(cat => {
+                const { mean, stdDev } = categoryStats[cat];
+                return calculateZScore(averageScores[cat], mean, stdDev);
+            });
+
+            new Chart(ctx, {
+                type: 'radar',
+                data: {
+                    labels: categories.map(cat => categoryLabels[cat]),
+                    datasets: [
+                        {
+                            label: 'あなたのスコア (偏差値)',
+                            data: participantData,
+                            backgroundColor: 'rgba(66, 133, 244, 0.2)', /* Google Blue with opacity */
+                            borderColor: 'rgba(66, 133, 244, 1)',
+                            borderWidth: 2,
+                            pointBackgroundColor: 'rgba(66, 133, 244, 1)',
+                            pointBorderColor: '#fff',
+                            pointHoverBackgroundColor: '#fff',
+                            pointHoverBorderColor: 'rgba(66, 133, 244, 1)'
+                        },
+                        {
+                            label: '全体平均 (偏差値)',
+                            data: averageData,
+                            backgroundColor: 'rgba(234, 67, 53, 0.1)', /* Google Red with opacity */
+                            borderColor: 'rgba(234, 67, 53, 0.8)',
+                            borderWidth: 1,
+                            borderDash: [5, 5],
+                            pointBackgroundColor: 'rgba(234, 67, 53, 0.8)',
+                            pointBorderColor: '#fff',
+                            pointHoverBackgroundColor: '#fff',
+                            pointHoverBorderColor: 'rgba(234, 67, 53, 0.8)'
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        r: {
+                            angleLines: { display: true, color: 'rgba(255, 255, 255, 0.1)' }, /* Subtle grid lines */
+                            grid: { color: 'rgba(255, 255, 255, 0.1)' }, /* Subtle grid lines */
+                            pointLabels: {
+                                font: { size: 10, weight: 'bold' },
+                                color: '#ffffff' /* White for labels */
+                            },
+                            min: 20,
+                            max: 80,
+                            ticks: {
+                                beginAtZero: true,
+                                stepSize: 10,
+                                color: 'rgba(255, 255, 255, 0.7)',
+                                backdropColor: 'transparent',
+                                callback: function(value) {
+                                    return value;
+                                }
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'bottom',
+                            labels: {
+                                font: {
+                                    size: 12,
+                                    weight: 'bold'
+                                },
+                                color: '#ffffff' /* White for legend text */
+                            }
+                        },
+                        datalabels: {
+                            display: false,
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return `${context.dataset.label}: ${context.raw.toFixed(1)}`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // 散布図描画関数
+        function createScatterChart(canvasId, overallMean, overallStdDev, importantPointMean, importantPointStdDev) {
+            const ctx = document.getElementById(canvasId).getContext('2d');
+            const scatterData = participantsData.map(p => ({
+                x: calculateZScore(p.overallScore, overallMean, overallStdDev),
+                y: calculateZScore(p.importantPointCount, importantPointMean, importantPointStdDev),
+                name: p.name,
+                submitted: p.submitted
+            }));
+
+            new Chart(ctx, {
+                type: 'scatter',
+                data: {
+                    datasets: [{
+                        label: '受講者スコア分布',
+                        data: scatterData,
+                        backgroundColor: function(context) {
+                            const dataPoint = context.dataset.data[context.dataIndex];
+                            return dataPoint.submitted ? 'rgba(255, 255, 255, 0.7)' : 'rgba(255, 0, 0, 0.5)';
+                        },
+                        borderColor: function(context) {
+                            const dataPoint = context.dataset.data[context.dataIndex];
+                            return dataPoint.submitted ? 'rgba(255, 255, 255, 1)' : 'rgba(255, 0, 0, 1)';
+                        },
+                        borderWidth: 1,
+                        pointRadius: 6,
+                        pointHoverRadius: 8
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: {
+                            type: 'linear',
+                            position: 'bottom',
+                            title: {
+                                display: true,
+                                text: '総合スコア (偏差値)',
+                                font: { size: 14, weight: 'bold', color: '#ffffff' }
+                            },
+                            grid: { color: 'rgba(255, 255, 255, 0.1)' },
+                            ticks: { color: 'rgba(255, 255, 255, 0.7)' },
+                            min: 20, max: 80,
+                            stepSize: 10
+                        },
+                        y: {
+                            type: 'linear',
+                            position: 'left',
+                            title: {
+                                display: true,
+                                text: '★マーク視点言及数スコア (偏差値)',
+                                font: { size: 14, weight: 'bold', color: '#ffffff' }
+                            },
+                            grid: { color: 'rgba(255, 255, 255, 0.1)' },
+                            ticks: { color: 'rgba(255, 255, 255, 0.7)' },
+                            min: 20, max: 80,
+                            stepSize: 10
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: true,
+                            labels: {
+                                color: '#ffffff',
+                                usePointStyle: true,
+                                generateLabels: function(chart) {
+                                    return [
+                                        {
+                                            text: '提出済み',
+                                            fillStyle: 'rgba(255, 255, 255, 0.7)',
+                                            strokeStyle: 'rgba(255, 255, 255, 1)',
+                                            pointStyle: 'circle'
+                                        },
+                                        {
+                                            text: '未提出',
+                                            fillStyle: 'rgba(255, 0, 0, 0.5)',
+                                            strokeStyle: 'rgba(255, 0, 0, 1)',
+                                            pointStyle: 'circle'
+                                        }
+                                    ];
+                                }
+                            }
+                        },
+                        datalabels: {
+                            display: true,
+                            align: 'top',
+                            offset: 5,
+                            color: '#ffffff',
+                            font: {
+                                size: 10,
+                                weight: 'bold'
+                            },
+                            formatter: function(value, context) {
+                                return context.dataset.data[context.dataIndex].name;
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const dataPoint = context.raw;
+                                    const status = dataPoint.submitted ? '提出済み' : '未提出';
+                                    return `${dataPoint.name} (${status}) - 総合: ${dataPoint.x.toFixed(1)}, ★視点: ${dataPoint.y.toFixed(1)})`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // ヒートマップのセル色をスコアに基づいて返す関数 (寒色-暖色)
+        function getHeatmapColorClass(score, mean, stdDev) {
+            const zScore = calculateZScore(score, mean, stdDev);
+            let color1, color2;
+
+            if (zScore >= 65) {
+                color1 = 'rgba(234, 67, 53, 0.5)'; /* Red */
+                color2 = 'rgba(255, 153, 0, 0.5)'; /* Orange */
+            } else if (zScore >= 55) {
+                color1 = 'rgba(234, 67, 53, 0.3)'; /* Red */
+                color2 = 'rgba(255, 153, 0, 0.3)'; /* Orange */
+            } else if (zScore >= 45) {
+                color1 = 'rgba(156, 39, 176, 0.3)'; /* Purple */
+                color2 = 'rgba(234, 67, 53, 0.3)'; /* Red */
+            } else if (zScore >= 35) {
+                color1 = 'rgba(66, 133, 244, 0.3)'; /* Blue */
+                color2 = 'rgba(156, 39, 176, 0.3)'; /* Purple */
+            } else {
+                color1 = 'rgba(66, 133, 244, 0.2)'; /* Blue */
+                color2 = 'rgba(156, 39, 176, 0.2)'; /* Purple */
+            }
+            return `linear-gradient(135deg, ${color1}, ${color2})`;
+        }
+
+
+        // 個別フィードバック生成関数
+        function generateIndividualFeedbacks(categoryStats) {
+            const individualFeedbacksAccordion = document.getElementById('individual-feedbacks-accordion');
+            individualFeedbacksAccordion.innerHTML = ''; // 既存の内容をクリア
+            
+            participantsData.sort((a, b) => a.name.localeCompare(b.name, 'ja')); // あいうえお順にソート
+
+            participantsData.forEach((participant, index) => {
+                const accordionItem = document.createElement('div');
+                accordionItem.className = 'accordion-item mb-2';
+
+                const header = document.createElement('div');
+                header.className = 'accordion-header';
+                header.setAttribute('data-target', `content-${index}`);
+                
+                const statusText = participant.submitted ? 
+                    `総合スコア: ${participant.overallScore}` : 
+                    '<span class="text-red-400">未提出</span>';
+                
+                header.innerHTML = `
+                    <span>${participant.name} (${participant.department}) - ${statusText}</span>
+                    <svg class="accordion-icon w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                `;
+                header.onclick = function() { toggleAccordion(this); };
+                accordionItem.appendChild(header);
+
+                const content = document.createElement('div');
+                content.className = 'accordion-content';
+                content.id = `content-${index}`;
+                
+                if (participant.submitted) {
+                    content.innerHTML = `
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
+                            <div class="h-64 md:h-80">
+                                <canvas id="spiderChart-${index}"></canvas>
+                            </div>
+                            <div>
+                                <h4 class="font-semibold text-lg text-white mb-2">良かった点</h4>
+                                <p class="text-white text-opacity-80 mb-4">${participant.feedback.good}</p>
+                                <h4 class="font-semibold text-lg text-white mb-2">改善や成長が必要な点</h4>
+                                <p class="text-white text-opacity-80 mb-4">${participant.feedback.improve}</p>
+                                <h4 class="font-semibold text-lg text-white mb-2">今後の成長・学習に向けてのアドバイス</h4>
+                                <p class="text-white text-opacity-80">${participant.feedback.advice}</p>
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    content.innerHTML = `
+                        <div class="text-center py-8">
+                            <div class="text-red-400 text-6xl mb-4">⚠️</div>
+                            <h4 class="font-semibold text-lg text-white mb-2">未提出</h4>
+                            <p class="text-white text-opacity-80">この受講者は課題を提出していません。</p>
+                            <p class="text-white text-opacity-80 mt-2">提出後、詳細なフィードバックが表示されます。</p>
+                        </div>
+                    `;
+                }
+                
+                accordionItem.appendChild(content);
+                individualFeedbacksAccordion.appendChild(accordionItem);
+
+                // 提出済みの場合のみチャートを描画
+                if (participant.submitted) {
+                    setTimeout(() => createSpiderChart(`spiderChart-${index}`, participant.scores), 100);
+                }
+            });
+        }
+
+        // ヒートマップ生成関数
+        function generateHeatmap(categoryStats) {
+            const heatmapBody = document.getElementById('heatmap-body');
+            heatmapBody.innerHTML = ''; // 既存の内容をクリア
+            
+            participantsData.forEach(participant => {
+                const row = document.createElement('tr');
+                row.className = 'hover:bg-white hover:bg-opacity-5';
+
+                const nameCell = document.createElement('td');
+                nameCell.className = 'py-3 px-4 whitespace-nowrap text-sm font-medium text-white';
+                nameCell.textContent = participant.name;
+                if (!participant.submitted) {
+                    nameCell.innerHTML += ' <span class="text-red-400 text-xs">(未提出)</span>';
+                }
+                row.appendChild(nameCell);
+
+                categories.forEach(cat => {
+                    const cell = document.createElement('td');
+                    cell.className = `py-3 px-4 whitespace-nowrap text-sm text-white text-center`;
+                    
+                    if (participant.submitted) {
+                        const score = participant.scores[cat];
+                        const { mean, stdDev } = categoryStats[cat];
+                        cell.style.backgroundImage = getHeatmapColorClass(score, mean, stdDev);
+                        cell.textContent = score;
+                    } else {
+                        cell.style.backgroundImage = 'linear-gradient(135deg, rgba(128, 128, 128, 0.3), rgba(128, 128, 128, 0.3))';
+                        cell.textContent = '未提出';
+                    }
+                    row.appendChild(cell);
+                });
+                heatmapBody.appendChild(row);
+            });
+        }
+
+        // データ読み込みの開始
+        loadData();
+
+        // アコーディオン開閉ロジック
+        function toggleAccordion(header) {
+            const content = document.getElementById(header.getAttribute('data-target'));
+            const icon = header.querySelector('.accordion-icon');
+            
+            // Toggle active class and rotate icon
+            if (content.classList.contains('active')) {
+                content.classList.remove('active');
+                if (icon) icon.classList.remove('rotate');
+            } else {
+                // Close other open accordions
+                document.querySelectorAll('.accordion-content.active').forEach(openContent => {
+                    openContent.classList.remove('active');
+                    const openIcon = openContent.previousElementSibling.querySelector('.accordion-icon');
+                    if (openIcon) openIcon.classList.remove('rotate');
+                });
+                // Open the clicked accordion
+                content.classList.add('active');
+                if (icon) icon.classList.add('rotate');
+            }
+        }
+    
+        // Ripple effect for the main title with text distortion
+        const mainTitle = document.querySelector('.main-title');
+        const wavyFilter = document.getElementById('wavyFilter');
+        const feTurbulence = wavyFilter.querySelector('feTurbulence');
+        const feDisplacementMap = wavyFilter.querySelector('feDisplacementMap');
+
+        mainTitle.addEventListener('mouseover', function(e) {
+            // Ripple effect
+            const ripple = document.createElement('span');
+            ripple.classList.add('ripple');
+            this.appendChild(ripple);
+
+            const rect = this.getBoundingClientRect();
+            const size = Math.max(rect.width, rect.height);
+            const x = e.clientX - rect.left - (size / 2);
+            const y = e.clientY - rect.top - (size / 2);
+
+            ripple.style.width = ripple.style.height = `${size}px`;
+            ripple.style.left = `${x}px`;
+            ripple.style.top = `${y}px`;
+
+            ripple.addEventListener('animationend', () => {
+                ripple.remove();
+            });
+
+            // Text distortion effect
+            mainTitle.classList.add('distort');
+            feTurbulence.setAttribute('baseFrequency', '0.01 0.05');
+            feDisplacementMap.setAttribute('scale', '10');
+
+            setTimeout(() => {
+                mainTitle.classList.remove('distort');
+                feTurbulence.setAttribute('baseFrequency', '0.005 0.005');
+                feDisplacementMap.setAttribute('scale', '0');
+            }, 600); // Match ripple animation duration
+        });
+    </script>
+</body>
+</html>
