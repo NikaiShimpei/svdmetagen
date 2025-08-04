@@ -257,7 +257,7 @@
         <section class="card">
             <h2 class="section-title">スコアリング基準</h2>
             <p class="mb-8 text-white">
-                本課題は、受講者の「事業成長パートナー」としての視点から提出物を評価しています。以下の3つの主要な評価軸に基づき、スコア化/偏差値化を行っています。
+                本課題は、受講者の「事業成長パートナー」としての視点から提出物を評価しています。以下の3つの主要な評価軸に基づき、スコア化を行っています。
             </p>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div class="infographic-item">
@@ -471,10 +471,9 @@
         let participantsData = [];
         let participantsList = [];
 
-        // スコアを偏差値化するヘルパー関数 (簡易版)
-        function calculateZScore(score, mean, stdDev) {
-            if (stdDev === 0) return 50; // 標準偏差が0の場合は平均値に固定
-            return ((score - mean) / stdDev) * 10 + 50; // Zスコアを偏差値に変換
+        // スコアを100点満点に正規化するヘルパー関数
+        function normalizeScore(score, maxScore) {
+            return Math.round((score / maxScore) * 100);
         }
 
         // データを読み込む関数
@@ -583,29 +582,21 @@
 
         // チャートとUIを初期化する関数
         function initializeChartsAndUI() {
-            // 各カテゴリの平均と標準偏差を計算
+            // 各カテゴリの平均スコアを計算（提出済みの参加者のみ）
             const categoryStats = {};
-            const overallScores = participantsData.map(p => p.overallScore);
-            const overallMean = overallScores.reduce((a, b) => a + b, 0) / overallScores.length;
-            const overallStdDev = Math.sqrt(overallScores.reduce((sum, score) => sum + Math.pow(score - overallMean, 2), 0) / overallScores.length);
+            const submittedParticipants = participantsData.filter(p => p.submitted);
 
-            const importantPointCounts = participantsData.map(p => p.importantPointCount);
-            const importantPointMean = importantPointCounts.reduce((a, b) => a + b, 0) / importantPointCounts.length;
-            const importantPointStdDev = Math.sqrt(importantPointCounts.reduce((sum, count) => sum + Math.pow(count - importantPointMean, 2), 0) / importantPointCounts.length);
-
-            const averageScores = {}; // 全受講者のカテゴリ別平均スコア
+            const averageScores = {}; // 提出済み受講者のカテゴリ別平均スコア
             categories.forEach(cat => {
-                const scores = participantsData.map(p => p.scores[cat]);
+                const scores = submittedParticipants.map(p => p.scores[cat]);
                 const sum = scores.reduce((a, b) => a + b, 0);
                 const mean = sum / scores.length;
-                const variance = scores.reduce((sum, score) => sum + Math.pow(score - mean, 2), 0) / scores.length;
-                const stdDev = Math.sqrt(variance);
-                categoryStats[cat] = { mean, stdDev };
+                categoryStats[cat] = { mean };
                 averageScores[cat] = mean;
             });
 
             // 散布図の描画
-            createScatterChart('overallScatterChart', overallMean, overallStdDev, importantPointMean, importantPointStdDev);
+            createScatterChart('overallScatterChart');
             
             // ヒートマップの生成
             generateHeatmap(categoryStats);
@@ -614,37 +605,18 @@
             generateIndividualFeedbacks(categoryStats);
         }
 
-        // 各カテゴリの平均と標準偏差を計算
-        const categoryStats = {};
-        const overallScores = participantsData.map(p => p.overallScore);
-        const overallMean = overallScores.reduce((a, b) => a + b, 0) / overallScores.length;
-        const overallStdDev = Math.sqrt(overallScores.reduce((sum, score) => sum + Math.pow(score - overallMean, 2), 0) / overallScores.length);
-
-        const importantPointCounts = participantsData.map(p => p.importantPointCount);
-        const importantPointMean = importantPointCounts.reduce((a, b) => a + b, 0) / importantPointCounts.length;
-        const importantPointStdDev = Math.sqrt(importantPointCounts.reduce((sum, count) => sum + Math.pow(count - importantPointMean, 2), 0) / importantPointCounts.length);
-
-
-        const averageScores = {}; // 全受講者のカテゴリ別平均スコア
-        categories.forEach(cat => {
-            const scores = participantsData.map(p => p.scores[cat]);
-            const sum = scores.reduce((a, b) => a + b, 0);
-            const mean = sum / scores.length;
-            const variance = scores.reduce((sum, score) => sum + Math.pow(score - mean, 2), 0) / scores.length;
-            const stdDev = Math.sqrt(variance);
-            categoryStats[cat] = { mean, stdDev };
-            averageScores[cat] = mean;
-        });
+        // 注：この部分は重複しているため削除（initializeChartsAndUI関数内で計算済み）
 
         // スパイダーチャート描画関数
         function createSpiderChart(canvasId, participantScores) {
             const ctx = document.getElementById(canvasId).getContext('2d');
             
-            // カテゴリ統計を計算
+            // カテゴリ統計を計算（提出済みの参加者のみ）
             const categoryStats = {};
             const averageScores = {};
+            const submittedParticipants = participantsData.filter(p => p.submitted);
             categories.forEach(cat => {
-                const scores = participantsData.map(p => p.scores[cat]);
+                const scores = submittedParticipants.map(p => p.scores[cat]);
                 const sum = scores.reduce((a, b) => a + b, 0);
                 const mean = sum / scores.length;
                 const variance = scores.reduce((sum, score) => sum + Math.pow(score - mean, 2), 0) / scores.length;
@@ -654,12 +626,10 @@
             });
             
             const participantData = categories.map(cat => {
-                const { mean, stdDev } = categoryStats[cat];
-                return calculateZScore(participantScores[cat], mean, stdDev);
+                return participantScores[cat]; // 生スコアをそのまま使用（既に100点満点に正規化済み）
             });
             const averageData = categories.map(cat => {
-                const { mean, stdDev } = categoryStats[cat];
-                return calculateZScore(averageScores[cat], mean, stdDev);
+                return averageScores[cat]; // 生スコアをそのまま使用（既に100点満点に正規化済み）
             });
 
             new Chart(ctx, {
@@ -668,7 +638,7 @@
                     labels: categories.map(cat => categoryLabels[cat]),
                     datasets: [
                         {
-                            label: 'あなたのスコア (偏差値)',
+                            label: 'あなたのスコア (100点満点)',
                             data: participantData,
                             backgroundColor: 'rgba(66, 133, 244, 0.2)', /* Google Blue with opacity */
                             borderColor: 'rgba(66, 133, 244, 1)',
@@ -679,7 +649,7 @@
                             pointHoverBorderColor: 'rgba(66, 133, 244, 1)'
                         },
                         {
-                            label: '全体平均 (偏差値)',
+                            label: '全体平均 (100点満点)',
                             data: averageData,
                             backgroundColor: 'rgba(234, 67, 53, 0.1)', /* Google Red with opacity */
                             borderColor: 'rgba(234, 67, 53, 0.8)',
@@ -703,8 +673,8 @@
                                 font: { size: 10, weight: 'bold' },
                                 color: '#ffffff' /* White for labels */
                             },
-                            min: 20,
-                            max: 80,
+                            min: 0,
+                            max: 100,
                             ticks: {
                                 beginAtZero: true,
                                 stepSize: 10,
@@ -744,14 +714,17 @@
         }
 
         // 散布図描画関数
-        function createScatterChart(canvasId, overallMean, overallStdDev, importantPointMean, importantPointStdDev) {
+        function createScatterChart(canvasId) {
             const ctx = document.getElementById(canvasId).getContext('2d');
-            const scatterData = participantsData.map(p => ({
-                x: calculateZScore(p.overallScore, overallMean, overallStdDev),
-                y: calculateZScore(p.importantPointCount, importantPointMean, importantPointStdDev),
-                name: p.name,
-                submitted: p.submitted
-            }));
+            // 提出済みの参加者のみを散布図に表示
+            const scatterData = participantsData
+                .filter(p => p.submitted) // 提出済みのみフィルタリング
+                .map(p => ({
+                    x: p.overallScore, // 生スコアをそのまま使用（既に100点満点に正規化済み）
+                    y: p.importantPointCount, // 生スコアをそのまま使用（既に100点満点に正規化済み）
+                    name: p.name,
+                    submitted: p.submitted
+                }));
 
             new Chart(ctx, {
                 type: 'scatter',
@@ -781,26 +754,26 @@
                             position: 'bottom',
                             title: {
                                 display: true,
-                                text: '総合スコア (偏差値)',
+                                text: '総合スコア (100点満点)',
                                 font: { size: 14, weight: 'bold', color: '#ffffff' }
                             },
                             grid: { color: 'rgba(255, 255, 255, 0.1)' },
                             ticks: { color: 'rgba(255, 255, 255, 0.7)' },
-                            min: 20, max: 80,
-                            stepSize: 10
+                            min: 0, max: 100,
+                            stepSize: 20
                         },
                         y: {
                             type: 'linear',
                             position: 'left',
                             title: {
                                 display: true,
-                                text: '★マーク視点言及数スコア (偏差値)',
+                                text: '★マーク視点言及数スコア (100点満点)',
                                 font: { size: 14, weight: 'bold', color: '#ffffff' }
                             },
                             grid: { color: 'rgba(255, 255, 255, 0.1)' },
                             ticks: { color: 'rgba(255, 255, 255, 0.7)' },
-                            min: 20, max: 80,
-                            stepSize: 10
+                            min: 0, max: 100,
+                            stepSize: 20
                         }
                     },
                     plugins: {
@@ -855,20 +828,20 @@
         }
 
         // ヒートマップのセル色をスコアに基づいて返す関数 (寒色-暖色)
-        function getHeatmapColorClass(score, mean, stdDev) {
-            const zScore = calculateZScore(score, mean, stdDev);
+        function getHeatmapColorClass(score) {
+            // 100点満点のスコアを直接使用して色分け
             let color1, color2;
 
-            if (zScore >= 65) {
+            if (score >= 80) {
                 color1 = 'rgba(234, 67, 53, 0.5)'; /* Red */
                 color2 = 'rgba(255, 153, 0, 0.5)'; /* Orange */
-            } else if (zScore >= 55) {
+            } else if (score >= 60) {
                 color1 = 'rgba(234, 67, 53, 0.3)'; /* Red */
                 color2 = 'rgba(255, 153, 0, 0.3)'; /* Orange */
-            } else if (zScore >= 45) {
+            } else if (score >= 40) {
                 color1 = 'rgba(156, 39, 176, 0.3)'; /* Purple */
                 color2 = 'rgba(234, 67, 53, 0.3)'; /* Red */
-            } else if (zScore >= 35) {
+            } else if (score >= 20) {
                 color1 = 'rgba(66, 133, 244, 0.3)'; /* Blue */
                 color2 = 'rgba(156, 39, 176, 0.3)'; /* Purple */
             } else {
@@ -969,8 +942,7 @@
                     
                     if (participant.submitted) {
                         const score = participant.scores[cat];
-                        const { mean, stdDev } = categoryStats[cat];
-                        cell.style.backgroundImage = getHeatmapColorClass(score, mean, stdDev);
+                        cell.style.backgroundImage = getHeatmapColorClass(score);
                         cell.textContent = score;
                     } else {
                         cell.style.backgroundImage = 'linear-gradient(135deg, rgba(128, 128, 128, 0.3), rgba(128, 128, 128, 0.3))';
