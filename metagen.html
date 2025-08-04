@@ -553,15 +553,22 @@
                 participantsData = allParticipantsData;
 
                 // データ読み込み完了後、チャートとUIを初期化
-                initializeChartsAndUI();
+                try {
+                    initializeChartsAndUI();
+                } catch (error) {
+                    console.error('UI初期化エラー:', error);
+                    throw new Error(`UI初期化エラー: ${error.message}`);
+                }
                 
             } catch (error) {
                 console.error('データの読み込みに失敗しました:', error);
+                console.error('エラーの詳細:', error.stack);
                 // エラー時の詳細な情報を表示
                 document.body.innerHTML = `
                     <div style="text-align: center; padding: 50px; color: white; background: linear-gradient(135deg, #4285F4 0%, #9C27B0 50%, #EA4335 100%); min-height: 100vh; font-family: Arial, sans-serif;">
                         <h1>データの読み込みに失敗しました</h1>
                         <p>エラー詳細: ${error.message}</p>
+                        <p>エラーの場所: ${error.stack ? error.stack.split('\n')[1] : '不明'}</p>
                         <p>以下の点を確認してください：</p>
                         <ul style="text-align: left; max-width: 600px; margin: 20px auto;">
                             <li>GitHub Pagesが有効になっているか</li>
@@ -874,50 +881,50 @@
 
         // 個別フィードバック生成関数
         function generateIndividualFeedbacks(categoryStats) {
-            const individualFeedbacksAccordion = document.getElementById('individual-feedbacks-accordion');
+        const individualFeedbacksAccordion = document.getElementById('individual-feedbacks-accordion');
             individualFeedbacksAccordion.innerHTML = ''; // 既存の内容をクリア
             
-            participantsData.sort((a, b) => a.name.localeCompare(b.name, 'ja')); // あいうえお順にソート
+        participantsData.sort((a, b) => a.name.localeCompare(b.name, 'ja')); // あいうえお順にソート
 
-            participantsData.forEach((participant, index) => {
-                const accordionItem = document.createElement('div');
-                accordionItem.className = 'accordion-item mb-2';
+        participantsData.forEach((participant, index) => {
+            const accordionItem = document.createElement('div');
+            accordionItem.className = 'accordion-item mb-2';
 
-                const header = document.createElement('div');
-                header.className = 'accordion-header';
-                header.setAttribute('data-target', `content-${index}`);
+            const header = document.createElement('div');
+            header.className = 'accordion-header';
+            header.setAttribute('data-target', `content-${index}`);
                 
                 const statusText = participant.submitted ? 
                     `総合スコア: ${participant.overallScore}` : 
                     '<span class="text-red-400">未提出</span>';
                 
-                header.innerHTML = `
+            header.innerHTML = `
                     <span>${participant.name} (${participant.department}) - ${statusText}</span>
-                    <svg class="accordion-icon w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
-                `;
-                header.onclick = function() { toggleAccordion(this); };
-                accordionItem.appendChild(header);
+                <svg class="accordion-icon w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+            `;
+            header.onclick = function() { toggleAccordion(this); };
+            accordionItem.appendChild(header);
 
-                const content = document.createElement('div');
-                content.className = 'accordion-content';
-                content.id = `content-${index}`;
+            const content = document.createElement('div');
+            content.className = 'accordion-content';
+            content.id = `content-${index}`;
                 
                 if (participant.submitted) {
-                    content.innerHTML = `
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
-                            <div class="h-64 md:h-80">
-                                <canvas id="spiderChart-${index}"></canvas>
-                            </div>
-                            <div>
-                                <h4 class="font-semibold text-lg text-white mb-2">良かった点</h4>
-                                <p class="text-white text-opacity-80 mb-4">${participant.feedback.good}</p>
-                                <h4 class="font-semibold text-lg text-white mb-2">改善や成長が必要な点</h4>
-                                <p class="text-white text-opacity-80 mb-4">${participant.feedback.improve}</p>
-                                <h4 class="font-semibold text-lg text-white mb-2">今後の成長・学習に向けてのアドバイス</h4>
-                                <p class="text-white text-opacity-80">${participant.feedback.advice}</p>
-                            </div>
-                        </div>
-                    `;
+            content.innerHTML = `
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
+                    <div class="h-64 md:h-80">
+                        <canvas id="spiderChart-${index}"></canvas>
+                    </div>
+                    <div>
+                        <h4 class="font-semibold text-lg text-white mb-2">良かった点</h4>
+                        <p class="text-white text-opacity-80 mb-4">${participant.feedback.good}</p>
+                        <h4 class="font-semibold text-lg text-white mb-2">改善や成長が必要な点</h4>
+                        <p class="text-white text-opacity-80 mb-4">${participant.feedback.improve}</p>
+                        <h4 class="font-semibold text-lg text-white mb-2">今後の成長・学習に向けてのアドバイス</h4>
+                        <p class="text-white text-opacity-80">${participant.feedback.advice}</p>
+                    </div>
+                </div>
+            `;
                 } else {
                     content.innerHTML = `
                         <div class="text-center py-8">
@@ -929,36 +936,36 @@
                     `;
                 }
                 
-                accordionItem.appendChild(content);
-                individualFeedbacksAccordion.appendChild(accordionItem);
+            accordionItem.appendChild(content);
+            individualFeedbacksAccordion.appendChild(accordionItem);
 
                 // 提出済みの場合のみチャートを描画
                 if (participant.submitted) {
-                    setTimeout(() => createSpiderChart(`spiderChart-${index}`, participant.scores), 100);
+            setTimeout(() => createSpiderChart(`spiderChart-${index}`, participant.scores), 100);
                 }
-            });
+        });
         }
 
         // ヒートマップ生成関数
         function generateHeatmap(categoryStats) {
-            const heatmapBody = document.getElementById('heatmap-body');
+        const heatmapBody = document.getElementById('heatmap-body');
             heatmapBody.innerHTML = ''; // 既存の内容をクリア
             
-            participantsData.forEach(participant => {
-                const row = document.createElement('tr');
+        participantsData.forEach(participant => {
+            const row = document.createElement('tr');
                 row.className = 'hover:bg-white hover:bg-opacity-5';
 
-                const nameCell = document.createElement('td');
-                nameCell.className = 'py-3 px-4 whitespace-nowrap text-sm font-medium text-white';
-                nameCell.textContent = participant.name;
+            const nameCell = document.createElement('td');
+            nameCell.className = 'py-3 px-4 whitespace-nowrap text-sm font-medium text-white';
+            nameCell.textContent = participant.name;
                 if (!participant.submitted) {
                     nameCell.innerHTML += ' <span class="text-red-400 text-xs">(未提出)</span>';
                 }
-                row.appendChild(nameCell);
+            row.appendChild(nameCell);
 
-                categories.forEach(cat => {
-                    const cell = document.createElement('td');
-                    cell.className = `py-3 px-4 whitespace-nowrap text-sm text-white text-center`;
+            categories.forEach(cat => {
+                const cell = document.createElement('td');
+                cell.className = `py-3 px-4 whitespace-nowrap text-sm text-white text-center`;
                     
                     if (participant.submitted) {
                         const score = participant.scores[cat];
@@ -969,10 +976,10 @@
                         cell.style.backgroundImage = 'linear-gradient(135deg, rgba(128, 128, 128, 0.3), rgba(128, 128, 128, 0.3))';
                         cell.textContent = '未提出';
                     }
-                    row.appendChild(cell);
-                });
-                heatmapBody.appendChild(row);
+                row.appendChild(cell);
             });
+            heatmapBody.appendChild(row);
+        });
         }
 
         // データ読み込みの開始
