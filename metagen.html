@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>生活者価値デザイン研修プログラム</title>
-    <!-- Google Fonts: Mplus 1 -->
-    <link href="https://fonts.googleapis.com/css2?family=Mplus+1:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- Google Fonts: M Plus 1 -->
+    <link href="https://fonts.googleapis.com/css2?family=M+PLUS+1:wght@400;500;700&display=swap" rel="stylesheet">
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Chart.js CDN -->
@@ -13,7 +13,7 @@
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
     <style>
         body {
-            font-family: 'Mplus 1'; /* Removed sans-serif to ensure Mplus 1 is primary */
+            font-family: 'M PLUS 1', sans-serif; /* Correct font family name */
             /* Gradient background inspired by Gemini icon colors */
             background: linear-gradient(135deg, #4285F4 0%, #9C27B0 50%, #EA4335 100%);
             color: #e0f2fe; /* Light Blue Text */
@@ -46,6 +46,7 @@
             background-color: rgba(255, 255, 255, 0.12); /* Slightly more opaque on hover */
         }
         .section-title {
+            font-family: 'M PLUS 1', sans-serif;
             font-size: 2rem;
             font-weight: 700;
             color: #ffffff; /* White for titles */
@@ -54,6 +55,7 @@
             padding-bottom: 0.5rem;
         }
         .subsection-title {
+            font-family: 'M PLUS 1', sans-serif;
             font-size: 1.5rem;
             font-weight: 600;
             color: #ffffff; /* White */
@@ -62,7 +64,7 @@
         }
         /* Main Title styling (no animation, no glow) */
         .main-title {
-            font-family: 'Mplus 1', sans-serif;
+            font-family: 'M PLUS 1', sans-serif;
             font-size: 2.5rem; /* Smaller font size */
             font-weight: 700;
             color: #ffffff; /* White */
@@ -201,14 +203,55 @@
             background-color: rgba(255, 255, 255, 0.12);
         }
         .infographic-item h3 {
+            font-family: 'M PLUS 1', sans-serif;
             color: #ffffff;
             font-size: 1.25rem;
             font-weight: 700;
             margin-bottom: 0.75rem;
         }
         .infographic-item p {
+            font-family: 'M PLUS 1', sans-serif;
             color: #e0f2fe;
             font-size: 0.9rem;
+        }
+
+        /* 視認性向上のためのテキスト背景 */
+        .text-bg-white {
+            background-color: rgba(255, 255, 255, 0.95);
+            padding: 0.5rem 0.75rem;
+            border-radius: 0.5rem;
+            margin: 0.25rem 0;
+            display: inline-block;
+            font-family: 'M PLUS 1', sans-serif;
+        }
+        
+        .text-bg-white h4 {
+            color: #1f2937 !important;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            font-family: 'M PLUS 1', sans-serif;
+        }
+        
+        .text-bg-white p {
+            color: #374151 !important;
+            margin-bottom: 0.25rem;
+            font-family: 'M PLUS 1', sans-serif;
+        }
+        
+        .text-bg-white .text-xs {
+            color: #6b7280 !important;
+            font-family: 'M PLUS 1', sans-serif;
+        }
+
+        /* 未提出テキストの視認性向上 */
+        .not-submitted {
+            background-color: rgba(239, 68, 68, 0.95);
+            color: white !important;
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.25rem;
+            font-weight: 600;
+            font-size: 0.75rem;
+            font-family: 'M PLUS 1', sans-serif;
         }
     </style>
 </head>
@@ -260,7 +303,7 @@
         <section class="card">
             <h2 class="section-title">スコアリング基準</h2>
             <p class="mb-8 text-white">
-                本課題は、受講者の「事業成長パートナー」としての視点から提出物を評価しています。以下の3つの主要な評価軸に基づき、スコア化を行っています。by 人材開発事務局
+                本課題は、受講者の「事業成長パートナー」としての視点から提出物を評価しています。以下の3つの主要な評価軸に基づき、スコア化を行っています。
             </p>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div class="infographic-item">
@@ -322,7 +365,7 @@
         <section class="card">
             <h2 class="section-title">全体傾向と課題</h2>
             <p class="mb-8 text-white">
-                全受講者の評価結果から見える傾向と課題です。
+                全受講者の評価結果から見える傾向と課題を、インフォグラフィックで可視化しています。
             </p>
 
             <!-- 言及が多い領域（高評価） -->
@@ -331,21 +374,27 @@
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
                     <div class="infographic-item border-green-400 border-opacity-30">
                         <div class="text-4xl mb-3">🏢</div>
-                        <h4 class="text-green-400 font-bold">F. 博報堂の存在意義</h4>
-                        <p class="text-sm mb-2">平均スコア: 約50-55点</p>
-                        <p class="text-xs">博報堂の強みや提供価値を活かした提案が多く見られる。広告代理店としての経験やリソースを活用した提案が自然にできている。</p>
+                        <div class="text-bg-white">
+                            <h4>F. 博報堂の存在意義</h4>
+                            <p class="text-sm mb-2">平均スコア: 約50-55点</p>
+                            <p class="text-xs">博報堂の強みや提供価値を活かした提案が多く見られる。広告代理店としての経験やリソースを活用した提案が自然にできている。</p>
+                        </div>
                     </div>
                     <div class="infographic-item border-green-400 border-opacity-30">
                         <div class="text-4xl mb-3">🎨</div>
-                        <h4 class="text-green-400 font-bold">G. ブランディング・クリエイティブ</h4>
-                        <p class="text-sm mb-2">平均スコア: 約45-55点</p>
-                        <p class="text-xs">ブランド戦略やクリエイティブ提案が充実しており、博報堂の本業であるクリエイティブ領域での提案力が高いことが表れている。</p>
+                        <div class="text-bg-white">
+                            <h4>G. ブランディング・クリエイティブ</h4>
+                            <p class="text-sm mb-2">平均スコア: 約45-55点</p>
+                            <p class="text-xs">ブランド戦略やクリエイティブ提案が充実しており、博報堂の本業であるクリエイティブ領域での提案力が高いことが表れている。</p>
+                        </div>
                     </div>
                     <div class="infographic-item border-green-400 border-opacity-30">
                         <div class="text-4xl mb-3">💼</div>
-                        <h4 class="text-green-400 font-bold">C. B2B/B2C戦略</h4>
-                        <p class="text-sm mb-2">平均スコア: 約45-55点</p>
-                        <p class="text-xs">サービス開発やビジネスモデル提案が具体的。デジタルマーケティングやサービス設計の経験が活かされている。</p>
+                        <div class="text-bg-white">
+                            <h4>C. B2B/B2C戦略</h4>
+                            <p class="text-sm mb-2">平均スコア: 約45-55点</p>
+                            <p class="text-xs">サービス開発やビジネスモデル提案が具体的。デジタルマーケティングやサービス設計の経験が活かされている。</p>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -356,21 +405,27 @@
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
                     <div class="infographic-item border-red-400 border-opacity-30">
                         <div class="text-4xl mb-3">💰</div>
-                        <h4 class="text-red-400 font-bold">B. ファイナンス・法務</h4>
-                        <p class="text-sm mb-2">平均スコア: 約15-25点</p>
-                        <p class="text-xs">最も低いスコア領域。資金調達戦略への言及が極めて少ない。業界的な法規制や対応の視点が不足。ブートストラップ経営の次のステップへの理解が浅い。</p>
+                        <div class="text-bg-white">
+                            <h4>B. ファイナンス・法務</h4>
+                            <p class="text-sm mb-2">平均スコア: 約15-25点</p>
+                            <p class="text-xs">最も低いスコア領域。資金調達戦略への言及が極めて少ない。業界的な法規制や対応の視点が不足。ブートストラップ経営の次のステップへの理解が浅い。</p>
+                        </div>
                     </div>
                     <div class="infographic-item border-red-400 border-opacity-30">
                         <div class="text-4xl mb-3">📢</div>
-                        <h4 class="text-red-400 font-bold">H. 広告・プロモーション</h4>
-                        <p class="text-sm mb-2">平均スコア: 約30-40点</p>
-                        <p class="text-xs">意外にも低いスコア。研修の特徴がら、あえて避けたのか具体的な広告戦略よりも事業戦略に集中。</p>
+                        <div class="text-bg-white">
+                            <h4>H. 広告・プロモーション</h4>
+                            <p class="text-sm mb-2">平均スコア: 約30-40点</p>
+                            <p class="text-xs">意外にも低いスコア。研修の特徴がら、あえて避けたのか具体的な広告戦略よりも事業戦略に集中。</p>
+                        </div>
                     </div>
                     <div class="infographic-item border-red-400 border-opacity-30">
                         <div class="text-4xl mb-3">💻</div>
-                        <h4 class="text-red-400 font-bold">I. デジタル・顧客体験</h4>
-                        <p class="text-sm mb-2">平均スコア: 約35-45点</p>
-                        <p class="text-xs">CRMや顧客エンゲージメントの具体的な仕組み提案があまり見られない。デジタルプラットフォームの活用戦略への言及が少ない。</p>
+                        <div class="text-bg-white">
+                            <h4>I. デジタル・顧客体験</h4>
+                            <p class="text-sm mb-2">平均スコア: 約35-45点</p>
+                            <p class="text-xs">CRMや顧客エンゲージメントの具体的な仕組み提案があまり見られない。デジタルプラットフォームの活用戦略への言及が少ない。</p>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -440,18 +495,24 @@
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <div class="infographic-item border-blue-400 border-opacity-30">
                         <div class="text-4xl mb-3">👨‍💼</div>
-                        <h4 class="text-blue-400 font-bold">経営者視点の強化</h4>
-                        <p class="text-xs">創業社長の関心事（資金調達、Exit戦略、組織課題）への理解深化</p>
+                        <div class="text-bg-white">
+                            <h4>経営者視点の強化</h4>
+                            <p class="text-xs">創業社長の関心事（資金調達、Exit戦略、組織課題）への理解深化</p>
+                        </div>
                     </div>
                     <div class="infographic-item border-blue-400 border-opacity-30">
                         <div class="text-4xl mb-3">🛡️</div>
-                        <h4 class="text-blue-400 font-bold">リスク管理視点</h4>
-                        <p class="text-xs">事業リスクや法務課題への配慮を提案に組み込む</p>
+                        <div class="text-bg-white">
+                            <h4>リスク管理視点</h4>
+                            <p class="text-xs">事業リスクや法務課題への配慮を提案に組み込む</p>
+                        </div>
                     </div>
                     <div class="infographic-item border-blue-400 border-opacity-30">
                         <div class="text-4xl mb-3">📈</div>
-                        <h4 class="text-blue-400 font-bold">具体的な数値・ロードマップ</h4>
-                        <p class="text-xs">より具体的で実現可能な提案への発展</p>
+                        <div class="text-bg-white">
+                            <h4>具体的な数値・ロードマップ</h4>
+                            <p class="text-xs">より具体的で実現可能な提案への発展</p>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -1044,7 +1105,7 @@
                 
                 const statusText = participant.submitted ? 
                     `総合スコア: ${participant.overallScore} | ★マーク視点: ${participant.importantPointCount}` : 
-                    '<span class="text-red-400">未提出</span>';
+                    '<span class="not-submitted">未提出</span>';
                 
             header.innerHTML = `
                     <span>${participant.name} (${participant.department}) - ${statusText}</span>
@@ -1134,7 +1195,7 @@
             nameCell.className = 'py-3 px-4 whitespace-nowrap text-sm font-medium text-white';
             nameCell.textContent = participant.name;
                 if (!participant.submitted) {
-                    nameCell.innerHTML += ' <span class="text-red-400 text-xs">(未提出)</span>';
+                    nameCell.innerHTML += ' <span class="not-submitted">(未提出)</span>';
                 }
             row.appendChild(nameCell);
 
@@ -1148,7 +1209,7 @@
                         cell.textContent = score;
                     } else {
                         cell.style.backgroundImage = 'linear-gradient(135deg, rgba(128, 128, 128, 0.3), rgba(128, 128, 128, 0.3))';
-                        cell.textContent = '未提出';
+                        cell.innerHTML = '<span class="not-submitted">未提出</span>';
                     }
                 row.appendChild(cell);
             });
